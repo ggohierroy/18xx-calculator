@@ -1,0 +1,5 @@
+Push the database schema using the local environement variable file
+dotenv -e .env.local npx prisma db push
+
+Open the Prisma Studio
+dotenv -e .env.local npx prisma studio

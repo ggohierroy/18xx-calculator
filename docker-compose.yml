@@ -2,6 +2,7 @@ version: "3.8"
 
 services:
   web:
+    depends_on: [db]
     build:
       context: .
       dockerfile: Dockerfile
@@ -13,6 +14,7 @@ services:
       - /app/.next
     ports:
       - 3000:3000
+      - 5555:5555
     environment:
       DB_HOST: db
       DB_PORT: 5432
