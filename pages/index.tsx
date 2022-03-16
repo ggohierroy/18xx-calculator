@@ -6,8 +6,27 @@ import Box from '@mui/material/Box';
 import Link from '../src/Link';
 import ProTip from '../src/ProTip';
 import Copyright from '../src/Copyright';
+import Post, { PostProps } from "../src/Post"
+import { GetStaticProps } from "next"
+import prisma from '../lib/prisma';
 
-const Home: NextPage = () => {
+export const getStaticProps: GetStaticProps = async () => {
+  const feed = await prisma.post.findMany({
+    where: { published: true },
+    include: {
+      author: {
+        select: { name: true },
+      },
+    },
+  });
+  return { props: { feed } };
+}
+
+type Props = {
+  feed: PostProps[]
+}
+
+const Home: NextPage<Props> = (props) => {
   return (
     <Container maxWidth="lg">
       <Box
@@ -28,6 +47,33 @@ const Home: NextPage = () => {
         <ProTip />
         <Copyright />
       </Box>
+      <Box
+        sx={{
+          my: 4,
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        {props.feed.map((post) => (
+          <div key={post.id} className="post">
+            <Post post={post} />
+          </div>
+        ))}
+      </Box>
+      <style jsx>{`
+        .post {
+          background: white;
+          transition: box-shadow 0.1s ease-in;
+        }
+        .post:hover {
+          box-shadow: 1px 1px 3px #aaa;
+        }
+        .post + .post {
+          margin-top: 2rem;
+        }
+      `}</style>
     </Container>
   );
 };

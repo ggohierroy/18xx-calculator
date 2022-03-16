@@ -2,6 +2,8 @@ version: "3.8"
 
 services:
   web:
+    env_file:
+      - .env
     depends_on: [db]
     build:
       context: .
