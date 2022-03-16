@@ -3,3 +3,10 @@ dotenv -e .env.local npx prisma db push
 
 Open the Prisma Studio
 dotenv -e .env.local npx prisma studio
+
+Generate Prisma client
+dotenv -e .env.local npx prisma generate
+
+
+
+When changing the schema, the Prisma Client must be updated
