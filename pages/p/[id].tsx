@@ -4,6 +4,7 @@ import ReactMarkdown from "react-markdown"
 import { PostProps } from "../../src/Post"
 import Container from "@mui/material/Container"
 import prisma from '../../lib/prisma';
+import Router from 'next/router';
 
 export const getServerSideProps: GetServerSideProps = async ({ params }) => {
     const post = await prisma.post.findUnique({
@@ -12,7 +13,7 @@ export const getServerSideProps: GetServerSideProps = async ({ params }) => {
       },
       include: {
         author: {
-          select: { name: true },
+          select: { name: true, email: true },
         },
       },
     });
@@ -28,11 +29,20 @@ export const getServerSideProps: GetServerSideProps = async ({ params }) => {
     };
   };
 
+  async function publishPost(id: number): Promise<void> {
+    await fetch(`/api/publish/${id}`, {
+      method: 'PUT',
+    });
+    await Router.push('/');
+  }
+
 const Post: React.FC<PostProps> = (props) => {
   let title = props.title
   if (!props.published) {
     title = `${title} (Draft)`
   }
+  
+  const postBelongsToUser = 'ggohierroy@hotmail.com' === props.author?.email;
 
   return (
     <Container>
@@ -40,6 +50,9 @@ const Post: React.FC<PostProps> = (props) => {
         <h2>{title}</h2>
         <p>By {props?.author?.name || "Unknown author"}</p>
         <ReactMarkdown children={props.content} />
+        {!props.published && postBelongsToUser && (
+          <button onClick={() => publishPost(props.id)}>Publish</button>
+        )}
       </div>
       <style jsx>{`
         .page {
