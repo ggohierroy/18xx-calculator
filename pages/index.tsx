@@ -9,6 +9,11 @@ import Copyright from '../src/Copyright';
 import Post, { PostProps } from "../src/Post"
 import { GetStaticProps } from "next"
 import prisma from '../lib/prisma';
+import { useEffect, useState } from 'react'
+import { io, Socket } from 'socket.io-client';
+import { DefaultEventsMap } from '@socket.io/component-emitter';
+
+let socket: Socket<DefaultEventsMap, DefaultEventsMap>
 
 export const getStaticProps: GetStaticProps = async () => {
   const feed = await prisma.post.findMany({
@@ -27,6 +32,27 @@ type Props = {
 }
 
 const Home: NextPage<Props> = (props) => {
+  const [input, setInput] = useState('')
+  useEffect(() => { socketInitializer() }, [])
+
+  const onChangeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInput(e.target.value)
+    socket.emit('input-change', e.target.value)
+  }
+
+  const socketInitializer = async () => {
+    await fetch('/api/socket')
+    socket = io()
+  
+    socket.on('connect', () => {
+      console.log('connected')
+    })
+  
+    socket.on('update-input', msg => {
+      setInput(msg)
+    })
+  }
+
   return (
     <Container maxWidth="lg">
       <Box
@@ -61,6 +87,11 @@ const Home: NextPage<Props> = (props) => {
             <Post post={post} />
           </div>
         ))}
+        <input
+          placeholder="Type something"
+          value={input}
+          onChange={onChangeHandler}
+        />
       </Box>
       <style jsx>{`
         .post {
