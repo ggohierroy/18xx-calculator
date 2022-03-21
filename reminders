@@ -7,6 +7,7 @@ dotenv -e .env.local npx prisma studio
 Generate Prisma client
 dotenv -e .env.local npx prisma generate
 
-
+Ultimate docker reset everything command
+docker-compose build --force-rm --no-cache && docker-compose up --detach && docker-compose logs -f
 
 When changing the schema, the Prisma Client must be updated
