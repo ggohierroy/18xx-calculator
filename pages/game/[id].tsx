@@ -6,6 +6,7 @@ import prisma from '../../lib/prisma';
 import Router from 'next/router';
 import { Game, Prisma } from "@prisma/client";
 import Box from "@mui/material/Box";
+import Company from "../../components/Company";
 
 export const getServerSideProps: GetServerSideProps = async ({ params }) => {
     const game = await prisma.game.findUnique({
@@ -44,16 +45,11 @@ const GamePage: React.FC<GameWithCompanies> = (props) => {
                 my: 4,
                 gap: 2,
                 display: 'flex',
-                flexDirection: 'row',
-                justifyContent: 'center',
-                alignItems: 'center',
+                flexDirection: 'row'
                 }}
             >
                 {props.companies.map((company) => (
-                    <div key={company.id}>
-                        Company {company.id}
-                        {company.companyCode}
-                    </div>
+                    <Company key={company.id} gameCode={props.gameCode} company={company} />
                 ))}
             </Box>
         </Container>

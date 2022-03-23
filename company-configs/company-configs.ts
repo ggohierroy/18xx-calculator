@@ -1,4 +1,15 @@
-const CompanyConfig = {
+type CompanyConfigOption = {
+    [gameCode: string]: {
+        [companyCode: string]: {
+            companyCode: string
+            name: string
+            shortName: string
+            color: string
+        }
+    }
+}
+
+const CompanyConfig: CompanyConfigOption = {
     "1822": {
         "canadian-national": {
             "companyCode": "canadian-national",

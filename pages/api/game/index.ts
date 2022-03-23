@@ -6,13 +6,17 @@ import CompanyConfig from '../../../company-configs/company-configs';
 // POST /api/game
 export default async function handle(req: NextApiRequest, res: NextApiResponse) {
 
-    const gameName = "1822";
+    const gameCode = "1822";
 
     // create a new game
-    const game = await prisma.game.create({ data: {} });
+    const game = await prisma.game.create({
+        data: {
+            gameCode: gameCode
+        } 
+    });
 
     // insert companies
-    const gameConfig = CompanyConfig[gameName];
+    const gameConfig = CompanyConfig[gameCode];
 
     let data = [];
     for(var companyCode in gameConfig) {
@@ -20,7 +24,7 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
     }
     const companies = await prisma.company.createMany({
         data: data
-      })
+    })
 
     res.json(game);
 }

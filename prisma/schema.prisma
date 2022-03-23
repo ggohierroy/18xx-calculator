@@ -13,6 +13,7 @@ datasource db {
 model Game {
   id Int @default(autoincrement()) @id
   companies Company[]
+  gameCode String
 }
 
 model Company {
