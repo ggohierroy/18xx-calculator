@@ -4,7 +4,7 @@ dotenv -e .env.local npx prisma db push
 Open the Prisma Studio
 dotenv -e .env.local npx prisma studio
 
-Generate Prisma client
+Generate Prisma client (comment: this won't update it on the server)
 dotenv -e .env.local npx prisma generate
 
 Ultimate docker reset everything command

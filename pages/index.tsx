@@ -1,63 +1,50 @@
-import * as React from 'react';
 import type { NextPage } from 'next';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
-import Link from '../src/Link';
-import ProTip from '../src/ProTip';
-import Copyright from '../src/Copyright';
-import Post, { PostProps } from "../src/Post"
-import { GetStaticProps } from "next"
-import prisma from '../lib/prisma';
-import { useEffect, useState } from 'react'
-import { io, Socket } from 'socket.io-client';
-import { DefaultEventsMap } from '@socket.io/component-emitter';
+import { Button } from '@mui/material';
+import Router from 'next/router';
+import { Game } from '@prisma/client';
 
-let socket: Socket<DefaultEventsMap, DefaultEventsMap>
+const Home: NextPage = () => {
 
-export const getStaticProps: GetStaticProps = async () => {
-  const feed = await prisma.post.findMany({
-    where: { published: true },
-    include: {
-      author: {
-        select: { name: true },
-      },
-    },
-  });
-  return { props: { feed } };
-}
+  const createNewGame = async () => {
+    try {
+      const response = await fetch('/api/game', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
 
-type Props = {
-  feed: PostProps[]
-}
+      if(!response.ok){
+        console.error(response.statusText);
+        return;
+      }
 
-const Home: NextPage<Props> = (props) => {
-  const [input, setInput] = useState('')
-  useEffect(() => { socketInitializer() }, [])
+      const game = await (response.json() as Promise<Game>);
 
-  const onChangeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInput(e.target.value)
-    socket.emit('input-change', e.target.value)
-  }
+      await Router.push('/game/[id]', `/game/${game.id}`);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
-  const socketInitializer = async () => {
-    await fetch('/api/socket')
-    socket = io()
-  
-    socket.on('connect', () => {
-      console.log('connected')
-    })
-  
-    socket.on('update-input', msg => {
-      setInput(msg)
-    })
-  }
+  const clearAllGames = async() => {
+    try {
+      await fetch('/api/game/clear', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   return (
     <Container maxWidth="lg">
       <Box
         sx={{
           my: 4,
+          gap: 2,
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'center',
@@ -65,46 +52,15 @@ const Home: NextPage<Props> = (props) => {
         }}
       >
         <Typography variant="h4" component="h1" gutterBottom>
-          MUI v5 + Next.js with TypeScript example
+          18xx Calculator
         </Typography>
-        <Link href="/about" color="secondary">
-          Go to the about page
-        </Link>
-        <ProTip />
-        <Copyright />
+        <Button variant="contained" onClick={ () => { createNewGame(); } }>
+          Create New Game
+        </Button>
+        <Button variant="contained" onClick={ () => { clearAllGames(); } }>
+          Clear All Games
+        </Button>
       </Box>
-      <Box
-        sx={{
-          my: 4,
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
-      >
-        {props.feed.map((post) => (
-          <div key={post.id} className="post">
-            <Post post={post} />
-          </div>
-        ))}
-        <input
-          placeholder="Type something"
-          value={input}
-          onChange={onChangeHandler}
-        />
-      </Box>
-      <style jsx>{`
-        .post {
-          background: white;
-          transition: box-shadow 0.1s ease-in;
-        }
-        .post:hover {
-          box-shadow: 1px 1px 3px #aaa;
-        }
-        .post + .post {
-          margin-top: 2rem;
-        }
-      `}</style>
     </Container>
   );
 };
