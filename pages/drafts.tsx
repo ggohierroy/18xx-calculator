@@ -1,6 +1,6 @@
 import React from 'react';
 import { GetServerSideProps } from 'next';
-import Post, { PostProps } from '../src/Post';
+import Post, { PostProps } from '../components/Post';
 import prisma from '../lib/prisma';
 import Container from '@mui/material/Container';
 

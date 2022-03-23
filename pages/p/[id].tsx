@@ -1,7 +1,7 @@
 import React from "react"
 import { GetServerSideProps } from "next"
 import ReactMarkdown from "react-markdown"
-import { PostProps } from "../../src/Post"
+import { PostProps } from "../../components/Post"
 import Container from "@mui/material/Container"
 import prisma from '../../lib/prisma';
 import Router from 'next/router';
