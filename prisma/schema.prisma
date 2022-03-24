@@ -13,6 +13,7 @@ datasource db {
 model Game {
   id Int @default(autoincrement()) @id
   companies Company[]
+  users User[]
   gameCode String
 }
 
@@ -22,6 +23,16 @@ model Company {
   gameId Int
   companyPayingShares Int @default(0)
   companyCode String
+  companyShares CompanyShare[]
+}
+
+model CompanyShare {
+  id Int @default(autoincrement()) @id
+  company Company @relation(fields: [companyId], references: [id])
+  companyId Int
+  user User  @relation(fields: [userId], references: [id])
+  userId Int
+  quantity Int @default(0)
 }
 
 model Post {
@@ -35,10 +46,11 @@ model Post {
 
 model User {
   id Int @default(autoincrement()) @id
+  companyShares CompanyShare[]
+  game Game @relation(fields: [gameId], references: [id])
+  gameId Int
   name String?
   email String? @unique
-  createdAt DateTime  @default(now()) @map(name: "created_at")
-  updatedAt DateTime  @updatedAt @map(name: "updated_at")
   posts Post[]
   @@map(name: "users")
 }
