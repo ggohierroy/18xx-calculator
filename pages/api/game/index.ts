@@ -2,8 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import prisma from '../../../lib/prisma';
 import CompanyConfig from '../../../company-configs/company-configs';
 
-
-// POST /api/game
+// POST /api/companyShare
 export default async function handle(req: NextApiRequest, res: NextApiResponse) {
 
     const gameCode = "1822";
