@@ -34,25 +34,25 @@ type Props = {
 const Home: NextPage<Props> = (props) => {
   let socket: Socket<DefaultEventsMap, DefaultEventsMap>
   const [input, setInput] = useState('')
-  useEffect(() => { socketInitializer() }, [])
+  // useEffect(() => { socketInitializer() }, [])
 
   const onChangeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInput(e.target.value)
-    socket.emit('input-change', e.target.value)
+    //socket.emit('input-change', e.target.value)
   }
 
-  const socketInitializer = async () => {
-    await fetch('/api/socket')
-    socket = io()
+  // const socketInitializer = async () => {
+  //   await fetch('/api/socket')
+  //   socket = io()
 
-    socket.on('connect', () => {
-      console.log('connected')
-    })
+  //   socket.on('connect', () => {
+  //     console.log('connected')
+  //   })
 
-    socket.on('update-input', msg => {
-      setInput(msg)
-    })
-  }
+  //   socket.on('update-input', msg => {
+  //     setInput(msg)
+  //   })
+  // }
 
   return (
     <Container maxWidth="lg">
