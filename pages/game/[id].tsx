@@ -8,6 +8,8 @@ import { CompanyShare, Game, Prisma } from "@prisma/client";
 import Box from "@mui/material/Box";
 import Company from "../../components/Company";
 import { Tab, Tabs, Typography } from "@mui/material";
+import { io, Socket } from "socket.io-client";
+import { DefaultEventsMap } from "socket.io/dist/typed-events";
 
 export const getServerSideProps: GetServerSideProps = async ({ params }) => {
     const game = await prisma.game.findUnique({
@@ -36,20 +38,20 @@ export const getServerSideProps: GetServerSideProps = async ({ params }) => {
 };
 
 type GameWithCompaniesUsers = Prisma.GameGetPayload<{
-    include: { 
+    include: {
         companies: {
             include: {
                 companyShares: true
             }
         },
-        users: true 
+        users: true
     }
 }>
 
 function a11yProps(index: number) {
     return {
-      id: `simple-tab-${index}`,
-      'aria-controls': `simple-tabpanel-${index}`,
+        id: `simple-tab-${index}`,
+        'aria-controls': `simple-tabpanel-${index}`,
     };
 }
 
@@ -62,24 +64,43 @@ const GamePage: React.FC<GameWithCompaniesUsers> = (props) => {
     };
     const [companies, setCompanies] = React.useState(props.companies);
 
-    const handleAdd = async (companyId: number) => {
+    // let socket: Socket<DefaultEventsMap, DefaultEventsMap>
+    // React.useEffect(() => { socketInitializer() }, [])
+    // const socketInitializer = async () => {
+    //     await fetch('/api/socket');
+    //     socket = io();
+
+    //     socket.on('connect', () => {
+    //         console.log('connected');
+    //     })
+
+    //     socket.on('update-input', msg => {
+    //         //setInput(msg)
+    //     })
+    // }
+
+    const handleAdd = async (companyId: number, quantity: number) => {
 
         var modifiedShare: CompanyShare | undefined;
         const newCompanies = companies.map((company) => {
-            if(company.id != companyId)
+            if (company.id != companyId)
                 return company;
-            
+
             const newShares = company.companyShares.map((share) => {
-                if(share.userId != selectedUser.id)
+                if (share.userId != selectedUser.id)
                     return share;
-                
+
+                let newQuantity = share.quantity + quantity;
+                if (newQuantity < 0)
+                    newQuantity = 0;
+
                 const newShare = {
                     ...share,
-                    quantity: share.quantity + 1
+                    quantity: newQuantity
                 }
 
-                modifiedShare = {...newShare};
-                
+                modifiedShare = { ...newShare };
+
                 return newShare;
             });
             const newCompany = {
@@ -90,7 +111,7 @@ const GamePage: React.FC<GameWithCompaniesUsers> = (props) => {
             return newCompany;
         });
 
-        if(!modifiedShare)
+        if (!modifiedShare)
             throw new Error(`No modifiable share was found.`);
 
         setCompanies(newCompanies);
@@ -107,18 +128,12 @@ const GamePage: React.FC<GameWithCompaniesUsers> = (props) => {
         }
     };
 
-    const handleRemove = async (companyId: number) => {
-        // if (shareNumber == 0)
-        //     return;
-        // setShareNumber(shareNumber - 1)
-    };
-
     return (
         <Container>
             <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                 <Tabs value={tabIndex} onChange={handleChange} aria-label="basic tabs example">
                     {props.users.map((user) => (
-                    <Tab key={user.id} label={user.name} {...a11yProps(user.id)} />
+                        <Tab key={user.id} label={user.name} {...a11yProps(user.id)} />
                     ))}
                 </Tabs>
             </Box>
@@ -132,7 +147,7 @@ const GamePage: React.FC<GameWithCompaniesUsers> = (props) => {
                 }}
             >
                 {companies.map((company) => (
-                    <Company key={company.id} gameCode={props.gameCode} company={company} userId={selectedUser.id} onAdd={handleAdd} onRemove={handleRemove} />
+                    <Company key={company.id} gameCode={props.gameCode} company={company} userId={selectedUser.id} onAdd={handleAdd} />
                 ))}
             </Box>
         </Container>
