@@ -11,13 +11,12 @@ type CompanyWithCode = {
         companyShares: CompanyShare[];
     });
     userId: number;
-    onAdd: (companyId: number) => {}
-    onRemove: (companyId: number) => {}
+    onAdd: (companyId: number, quantity: number) => {}
 };
 
 // Component is a function that returns a JSX Element
 // JSX Element can be inferred, but this makes it more obvious
-const Company = ({ gameCode, company, userId, onAdd, onRemove }: CompanyWithCode): JSX.Element => {
+const Company = ({ gameCode, company, userId, onAdd }: CompanyWithCode): JSX.Element => {
 
     const gameConfig = CompanyConfig[gameCode];
     const config = gameConfig[company.companyCode];
@@ -27,10 +26,10 @@ const Company = ({ gameCode, company, userId, onAdd, onRemove }: CompanyWithCode
         throw new Error(`Couldn't find any shares for user ${userId} and company ${company.id}`);
 
     const handleAdd = async () => {
-        onAdd(company.id);
+        onAdd(company.id, 1);
     };
     const handleRemove = async () => {
-        onRemove(company.id)
+        onAdd(company.id, -1);
     };
     return (
         <Card sx={{
