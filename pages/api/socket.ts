@@ -1,3 +1,5 @@
+import { ServerResponse } from "http";
+import { NextApiResponse } from "next";
 import { Server } from "socket.io";
 
 const SocketHandler = (req:any, res:any) => {
@@ -9,8 +11,9 @@ const SocketHandler = (req:any, res:any) => {
     res.socket.server.io = io
 
     io.on('connection', socket => {
-        socket.on('input-change', msg => {
-            socket.broadcast.emit('update-input', msg)
+        socket.on('join-game', gameId => {
+            socket.join(gameId);
+            console.log(`joined game ${gameId}`);
         })
     })
   }

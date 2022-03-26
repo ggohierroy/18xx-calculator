@@ -56,28 +56,74 @@ function a11yProps(index: number) {
 }
 
 const GamePage: React.FC<GameWithCompaniesUsers> = (props) => {
+
     const [selectedUser, setSelectedUser] = React.useState(props.users[0]);
     const [tabIndex, setTabIndex] = React.useState(0);
     const handleChange = (event: React.SyntheticEvent, newValue: number) => {
         setSelectedUser(props.users[newValue]);
         setTabIndex(newValue);
+        window.localStorage.setItem(`lastIndex${props.id}`, newValue.toString());
     };
     const [companies, setCompanies] = React.useState(props.companies);
 
-    // let socket: Socket<DefaultEventsMap, DefaultEventsMap>
-    // React.useEffect(() => { socketInitializer() }, [])
-    // const socketInitializer = async () => {
-    //     await fetch('/api/socket');
-    //     socket = io();
+    let socket: Socket<DefaultEventsMap, DefaultEventsMap>
+    React.useEffect(() => { 
+        socketInitializer();
+        const lastIndexStorage = localStorage.getItem(`lastIndex${props.id}`);
+        let lastIndex = 0;
+        if(lastIndexStorage)
+            lastIndex = parseInt(lastIndexStorage);
+        if(lastIndex !== 0){
+            setSelectedUser(props.users[lastIndex]);
+            setTabIndex(lastIndex);
+        }
+    }, []);
+    const socketInitializer = async () => {
+        await fetch('/api/socket');
+        socket = io();
 
-    //     socket.on('connect', () => {
-    //         console.log('connected');
-    //     })
+        socket.on('connect', () => {
+            socket.emit("join-game", props.id);
+        })
 
-    //     socket.on('update-input', msg => {
-    //         //setInput(msg)
-    //     })
-    // }
+        socket.on('company-share-updated', (companyShare: CompanyShare) => {
+            updateCompanyShare(companyShare);
+        })
+    }
+
+    const companiesPrint = (companies: any) => {
+        console.log("-------------------- print companies --------------------")
+        companies.forEach((company: any) => {
+            let shareUser = [`share company ${company.companyCode}`];
+            company.companyShares.forEach((share: any) =>{
+                shareUser.push(`[userId:${share.userId} - quantity:${share.quantity}]`);
+            });
+            console.log(shareUser.join(", "));
+        });
+    }
+
+    const updateCompanyShare = async (companyShare: CompanyShare) => {
+        setCompanies(companies => {
+            const newCompanies = companies.map((company) => {
+                if (company.id != companyShare.companyId)
+                    return company;
+    
+                const newShares = company.companyShares.map((share) => {
+                    if (share.userId != companyShare.userId)
+                        return share;
+    
+                    return companyShare;
+                });
+                const newCompany = {
+                    ...company,
+                    companyShares: newShares
+                }
+    
+                return newCompany;
+            });
+            return newCompanies;
+        });
+    }
 
     const handleAdd = async (companyId: number, quantity: number) => {
 
@@ -117,7 +163,7 @@ const GamePage: React.FC<GameWithCompaniesUsers> = (props) => {
         setCompanies(newCompanies);
 
         try {
-            const body = { companyShareId: modifiedShare.id, quantity: modifiedShare.quantity };
+            const body = { companyShareId: modifiedShare.id, quantity: modifiedShare.quantity, gameId: props.id };
             await fetch('/api/company-share', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },

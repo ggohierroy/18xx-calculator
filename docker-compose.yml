@@ -1,28 +1,28 @@
 version: "3.8"
 
 services:
-  web:
-    env_file:
-      - .env
-    depends_on: [db]
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: web
-    restart: always
-    volumes:
-      - ./:/app
-      - /app/node_modules
-      - /app/.next
-    ports:
-      - 3000:3000
-      - 5555:5555
-    environment:
-      DB_HOST: db
-      DB_PORT: 5432
-      DB_USER: username
-      DB_PASSWORD: password
-      DB_NAME: default_database
+  # web:
+  #   env_file:
+  #     - .env
+  #   depends_on: [db]
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   container_name: web
+  #   restart: always
+  #   volumes:
+  #     - ./:/app
+  #     - /app/node_modules
+  #     - /app/.next
+  #   ports:
+  #     - 3000:3000
+  #     - 5555:5555
+  #   environment:
+  #     DB_HOST: db
+  #     DB_PORT: 5432
+  #     DB_USER: username
+  #     DB_PASSWORD: password
+  #     DB_NAME: default_database
 
   db:
     container_name: db

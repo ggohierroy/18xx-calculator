@@ -27,10 +27,12 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
     })
 
     // insert users/players
-    let usersData = [];
-    for(var i = 1; i <= numberOfPlayers; i++){
-        usersData.push({ gameId: game.id, name: "player" + i });
-    }
+    let usersData = [
+        { gameId: game.id, name: "Gabriel" },
+        { gameId: game.id, name: "Julien" },
+        { gameId: game.id, name: "Daniel" },
+        { gameId: game.id, name: "David" }
+    ];
 
     const resultUsers = await prisma.user.createMany({
         data: usersData
