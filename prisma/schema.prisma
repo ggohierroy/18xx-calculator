@@ -23,6 +23,7 @@ model Company {
   gameId Int
   companyPayingShares Int @default(0)
   companyCode String
+  lastPayout Int @default(0)
   companyShares CompanyShare[]
 }
 

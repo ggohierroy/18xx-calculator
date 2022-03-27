@@ -125,6 +125,10 @@ const GamePage: React.FC<GameWithCompaniesUsers> = (props) => {
         });
     }
 
+    const handlePayout = async (companyId: number, payout: number) => {
+
+    }
+
     const handleAdd = async (companyId: number, quantity: number) => {
 
         var modifiedShare: CompanyShare | undefined;
@@ -193,7 +197,7 @@ const GamePage: React.FC<GameWithCompaniesUsers> = (props) => {
                 }}
             >
                 {companies.map((company) => (
-                    <Company key={company.id} gameCode={props.gameCode} company={company} userId={selectedUser.id} onAdd={handleAdd} />
+                    <Company key={company.id} gameCode={props.gameCode} company={company} userId={selectedUser.id} onAdd={handleAdd} onConfirmPayout={handlePayout} />
                 ))}
             </Box>
         </Container>
