@@ -197,8 +197,8 @@ const GamePage: React.FC<GameWithCompaniesUsers> = (props) => {
         updateCompanyShare(newShare);
 
         try {
-            const body = { companyShareId: newShare.id, quantity: newShare.quantity, gameId: props.id };
-            await fetch('/api/company-share', {
+            const body = { quantity: newShare.quantity, gameId: props.id };
+            await fetch(`/api/company-share/${newShare.id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body),
