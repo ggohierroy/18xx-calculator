@@ -108,17 +108,29 @@ const GamePage: React.FC<GameWithCompaniesUsers> = (props) => {
         });
     }
 
-    const updateCompanyShare = async (companyShare: CompanyShare) => {
+    const updateCompany = async (newCompany: CompanyWithShares) => {
         setCompanies(companies => {
             const newCompanies = companies.map((company) => {
-                if (company.id != companyShare.companyId)
+                if (company.id != newCompany.id)
+                    return company;
+    
+                return newCompany;
+            });
+            return newCompanies;
+        });
+    }
+
+    const updateCompanyShare = async (newCompanyShare: CompanyShare) => {
+        setCompanies(companies => {
+            const newCompanies = companies.map((company) => {
+                if (company.id != newCompanyShare.companyId)
                     return company;
     
                 const newShares = company.companyShares.map((share) => {
-                    if (share.userId != companyShare.userId)
+                    if (share.userId != newCompanyShare.userId)
                         return share;
     
-                    return companyShare;
+                    return newCompanyShare;
                 });
                 const newCompany = {
                     ...company,
@@ -132,7 +144,27 @@ const GamePage: React.FC<GameWithCompaniesUsers> = (props) => {
     }
 
     const handlePayout = async (companyId: number, payout: number) => {
-        
+        const company = getCompany(companyId, companies);
+        if(!company)
+            throw new Error(`No company was found.`);
+
+        const newCompany = {
+            ...company,
+            lastPayout: payout
+        }
+        updateCompany(newCompany);
+    }
+
+    const getCompany = (companyId: number, companies: CompanyWithShares[]) => {
+        let foundCompany: CompanyWithShares | undefined;
+        companies.forEach(company => {
+            if(company.id != companyId)
+                return;
+
+            foundCompany = company;
+        });
+
+        return foundCompany;
     }
 
     const getCompanyShare = (companyId: number, userId: number, companies: CompanyWithShares[]) => {
@@ -155,7 +187,7 @@ const GamePage: React.FC<GameWithCompaniesUsers> = (props) => {
 
         const share = getCompanyShare(companyId, selectedUser.id, companies);
         if(!share)
-            throw new Error(`No modifiable share was found.`);
+            throw new Error(`No share was found.`);
         
         const newShare = {
             ...share,
