@@ -48,6 +48,12 @@ type GameWithCompaniesUsers = Prisma.GameGetPayload<{
     }
 }>
 
+type CompanyWithShares = Prisma.CompanyGetPayload<{
+    include: {
+        companyShares: true
+    }
+}>
+
 function a11yProps(index: number) {
     return {
         id: `simple-tab-${index}`,
@@ -126,48 +132,40 @@ const GamePage: React.FC<GameWithCompaniesUsers> = (props) => {
     }
 
     const handlePayout = async (companyId: number, payout: number) => {
+        
+    }
 
+    const getCompanyShare = (companyId: number, userId: number, companies: CompanyWithShares[]) => {
+        let companyShare: CompanyShare | undefined;
+        companies.forEach(company => {
+            if(company.id != companyId)
+                return;
+            company.companyShares.forEach(share => {
+                if(share.userId != userId)
+                    return;
+                
+                companyShare = share;
+            });
+        });
+
+        return companyShare;
     }
 
     const handleAdd = async (companyId: number, quantity: number) => {
 
-        var modifiedShare: CompanyShare | undefined;
-        const newCompanies = companies.map((company) => {
-            if (company.id != companyId)
-                return company;
-
-            const newShares = company.companyShares.map((share) => {
-                if (share.userId != selectedUser.id)
-                    return share;
-
-                let newQuantity = share.quantity + quantity;
-                if (newQuantity < 0)
-                    newQuantity = 0;
-
-                const newShare = {
-                    ...share,
-                    quantity: newQuantity
-                }
-
-                modifiedShare = { ...newShare };
-
-                return newShare;
-            });
-            const newCompany = {
-                ...company,
-                companyShares: newShares
-            }
-
-            return newCompany;
-        });
-
-        if (!modifiedShare)
+        const share = getCompanyShare(companyId, selectedUser.id, companies);
+        if(!share)
             throw new Error(`No modifiable share was found.`);
+        
+        const newShare = {
+            ...share,
+            quantity: share.quantity + quantity
+        }
 
-        setCompanies(newCompanies);
+        updateCompanyShare(newShare);
 
         try {
-            const body = { companyShareId: modifiedShare.id, quantity: modifiedShare.quantity, gameId: props.id };
+            const body = { companyShareId: newShare.id, quantity: newShare.quantity, gameId: props.id };
             await fetch('/api/company-share', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
