@@ -18,6 +18,9 @@ export const getServerSideProps: GetServerSideProps = async ({ params }) => {
         },
         include: {
             companies: {
+                orderBy: {
+                    companyCode: "asc"
+                },
                 include: {
                     companyShares: true
                 }
@@ -153,6 +156,17 @@ const GamePage: React.FC<GameWithCompaniesUsers> = (props) => {
             lastPayout: payout
         }
         updateCompany(newCompany);
+
+        try {
+            const body = { payout: payout, gameId: props.id };
+            await fetch(`/api/company/payout/${newCompany.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body),
+            });
+        } catch (error) {
+            console.error(error);
+        }
     }
 
     const getCompany = (companyId: number, companies: CompanyWithShares[]) => {

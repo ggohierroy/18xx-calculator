@@ -1,15 +1,16 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { Server } from 'socket.io';
 import { DefaultEventsMap } from 'socket.io/dist/typed-events';
-import prisma from '../../../lib/prisma';
+import prisma from '../../../../lib/prisma';
 
 // PUT /api/company/payout
 export default async function handle(req: NextApiRequest, res: NextApiResponse) {
-    const { companyId, payout, gameId } = req.body;
+    const companyId = req.query.id;
+    const { payout, gameId } = req.body;
 
     // get the company and shares
     const company = await prisma.company.findUnique({
-        where: { id: companyId },
+        where: { id: Number(companyId) },
         include: {
             companyShares: true
         }
@@ -17,7 +18,7 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
 
     // update last payout
     const result = await prisma.company.update({
-        where: { id: companyId },
+        where: { id: Number(companyId) },
         include: {
             companyShares: true
         },
