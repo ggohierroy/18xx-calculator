@@ -7,11 +7,12 @@ import Router from 'next/router';
 import { CompanyShare, Game, Prisma } from "@prisma/client";
 import Box from "@mui/material/Box";
 import Company from "../../components/Company";
-import { AppBar, Button, IconButton, Tab, Tabs, Toolbar, Typography } from "@mui/material";
+import { AppBar, Button, IconButton, Menu, MenuItem, Tab, Tabs, Toolbar, Typography } from "@mui/material";
 import { io, Socket } from "socket.io-client";
 import { DefaultEventsMap } from "socket.io/dist/typed-events";
 import Logs from "../../components/Logs";
 import MenuIcon from '@mui/icons-material/Menu';
+import { AccountCircle } from "@mui/icons-material";
 
 export const getServerSideProps: GetServerSideProps = async ({ params }) => {
     const game = await prisma.game.findUnique({
@@ -27,7 +28,11 @@ export const getServerSideProps: GetServerSideProps = async ({ params }) => {
                     companyShares: true
                 }
             },
-            users: true
+            users: {
+                orderBy: {
+                    name: "asc"
+                }
+            }
         }
     });
 
@@ -69,24 +74,24 @@ function a11yProps(index: number) {
 const GamePage: React.FC<GameWithCompaniesUsers> = (props) => {
 
     const [selectedUser, setSelectedUser] = React.useState(props.users[0]);
-    const [tabIndex, setTabIndex] = React.useState(0);
-    const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-        setSelectedUser(props.users[newValue]);
-        setTabIndex(newValue);
-        window.localStorage.setItem(`lastIndex${props.id}`, newValue.toString());
-    };
     const [companies, setCompanies] = React.useState(props.companies);
 
     const [socket, setSocket] = React.useState<Socket<DefaultEventsMap, DefaultEventsMap>>();
     React.useEffect(() => { 
         socketInitializer();
-        const lastIndexStorage = localStorage.getItem(`lastIndex${props.id}`);
-        let lastIndex = 0;
-        if(lastIndexStorage)
-            lastIndex = parseInt(lastIndexStorage);
-        if(lastIndex !== 0){
-            setSelectedUser(props.users[lastIndex]);
-            setTabIndex(lastIndex);
+        const lastUserIdStorage = localStorage.getItem(`lastUserId${props.id}`);
+        let lastUserId = 0;
+        if(lastUserIdStorage)
+            lastUserId = parseInt(lastUserIdStorage);
+        if(lastUserId !== 0){
+            let user = props.users.find(user => { 
+                if(user.id == lastUserId) 
+                    return true;
+                return false; 
+            });
+            if(!user)
+                throw new Error("Couldn't find user");
+            setSelectedUser(user);
         }
     }, []);
     const socketInitializer = async () => {
@@ -231,6 +236,29 @@ const GamePage: React.FC<GameWithCompaniesUsers> = (props) => {
         }
     };
 
+    const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+
+    const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
+
+    const handleUserSelected = (userId: Number) => {
+        let user = props.users.find(user => { 
+            if(user.id == userId) 
+                return true;
+            return false; 
+        });
+
+        if(!user)
+            throw new Error("Couldn't find user");
+        window.localStorage.setItem(`lastUserId${props.id}`, userId.toString());
+        setSelectedUser(user);
+    };
+
     return (
         <Box>
             <AppBar position="sticky">
@@ -244,20 +272,53 @@ const GamePage: React.FC<GameWithCompaniesUsers> = (props) => {
                 >
                 </IconButton>
                 <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                    News
+                    Last: {selectedUser.lastPayout} ({selectedUser.cumulativePayout})
                 </Typography>
-                <Tabs textColor="inherit" TabIndicatorProps={{style: {background:'white'}}} value={tabIndex} onChange={handleChange} aria-label="basic tabs example">
-                    {props.users.map((user) => (
-                        <Tab key={user.id} label={user.name} {...a11yProps(user.id)} />
-                    ))}
-                </Tabs>
+                <div>
+                    <Button
+                        aria-label="account of current user"
+                        aria-controls="menu-appbar"
+                        aria-haspopup="true"
+                        onClick={handleMenu}
+                        color="inherit"
+                    >
+                        {selectedUser.name}
+                    </Button>
+                    <Menu
+                        id="menu-appbar"
+                        anchorEl={anchorEl}
+                        anchorOrigin={{
+                            vertical: 'top',
+                            horizontal: 'right',
+                        }}
+                        keepMounted
+                        transformOrigin={{
+                            vertical: 'top',
+                            horizontal: 'right',
+                        }}
+                        open={Boolean(anchorEl)}
+                        onClose={handleClose}
+                    >
+                        {props.users.map((user) => (
+                        <MenuItem 
+                            key={user.id} 
+                            onClick={() => { 
+                                handleClose();
+                                handleUserSelected(user.id);
+                            }}
+                        >
+                            <Typography textAlign="center">{user.name}</Typography>
+                        </MenuItem>
+                        ))}
+                    </Menu>
+                </div>
                 </Toolbar>
             </AppBar>
             <Container>
                 <Logs gameId={props.id} socket={socket} />
                 <Box
                     sx={{
-                        my: 4,
+                        my: 2,
                         gap: 2,
                         display: 'flex',
                         flexDirection: 'row',

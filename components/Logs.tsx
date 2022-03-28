@@ -59,7 +59,7 @@ const Logs = ({ gameId, socket }: LogsProps): JSX.Element => {
     }
 
     return (
-        <Box mt={1} sx={{
+        <Box mt={2} sx={{
             border: 1,
             borderRadius: 1,
             height: 200,
