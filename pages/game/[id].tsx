@@ -4,7 +4,7 @@ import ReactMarkdown from "react-markdown"
 import Container from "@mui/material/Container"
 import prisma from '../../lib/prisma';
 import Router from 'next/router';
-import { CompanyShare, Game, Prisma } from "@prisma/client";
+import { CompanyShare, Game, Prisma, User } from "@prisma/client";
 import Box from "@mui/material/Box";
 import Company from "../../components/Company";
 import { AppBar, Button, IconButton, Menu, MenuItem, Tab, Tabs, Toolbar, Typography } from "@mui/material";
@@ -75,8 +75,9 @@ const GamePage: React.FC<GameWithCompaniesUsers> = (props) => {
 
     const [selectedUser, setSelectedUser] = React.useState(props.users[0]);
     const [companies, setCompanies] = React.useState(props.companies);
-
+    const [users, setUsers] = React.useState(props.users);
     const [socket, setSocket] = React.useState<Socket<DefaultEventsMap, DefaultEventsMap>>();
+    
     React.useEffect(() => { 
         socketInitializer();
         const lastUserIdStorage = localStorage.getItem(`lastUserId${props.id}`);
@@ -84,16 +85,13 @@ const GamePage: React.FC<GameWithCompaniesUsers> = (props) => {
         if(lastUserIdStorage)
             lastUserId = parseInt(lastUserIdStorage);
         if(lastUserId !== 0){
-            let user = props.users.find(user => { 
-                if(user.id == lastUserId) 
-                    return true;
-                return false; 
-            });
+            let user = users.find(user => user.id == lastUserId);
             if(!user)
                 throw new Error("Couldn't find user");
             setSelectedUser(user);
         }
     }, []);
+
     const socketInitializer = async () => {
         await fetch('/api/socket');
         
@@ -111,19 +109,20 @@ const GamePage: React.FC<GameWithCompaniesUsers> = (props) => {
             updateCompany(company);
         })
 
-        setSocket(socket);
-    }
+        socket.on('users-updated', (users: User[]) => {
+            updateUsers(users);
+        })
 
-    const companiesPrint = (companies: any) => {
-        console.log("-------------------- print companies --------------------")
-        companies.forEach((company: any) => {
-            let shareUser = [`share company ${company.companyCode}`];
-            company.companyShares.forEach((share: any) =>{
-                shareUser.push(`[userId:${share.userId} - quantity:${share.quantity}]`);
-            });
-            console.log(shareUser.join(", "));
+        setSocket(socket);
+    };
+
+    const updateUsers = async (users: User[]) => {
+        setUsers(users);
+        setSelectedUser(selectedUser => {
+            var currentUser = users.find(user => user.id == selectedUser.id);
+            return currentUser || selectedUser;
         });
-    }
+    };
 
     const updateCompany = async (newCompany: CompanyWithShares) => {
         setCompanies(companies => {
@@ -135,7 +134,7 @@ const GamePage: React.FC<GameWithCompaniesUsers> = (props) => {
             });
             return newCompanies;
         });
-    }
+    };
 
     const updateCompanyShare = async (newCompanyShare: CompanyShare) => {
         setCompanies(companies => {
@@ -158,7 +157,7 @@ const GamePage: React.FC<GameWithCompaniesUsers> = (props) => {
             });
             return newCompanies;
         });
-    }
+    };
 
     const handlePayout = async (companyId: number, payout: number) => {
         const company = getCompany(companyId, companies);
@@ -181,7 +180,7 @@ const GamePage: React.FC<GameWithCompaniesUsers> = (props) => {
         } catch (error) {
             console.error(error);
         }
-    }
+    };
 
     const getCompany = (companyId: number, companies: CompanyWithShares[]) => {
         let foundCompany: CompanyWithShares | undefined;
@@ -193,7 +192,7 @@ const GamePage: React.FC<GameWithCompaniesUsers> = (props) => {
         });
 
         return foundCompany;
-    }
+    };
 
     const getCompanyShare = (companyId: number, userId: number, companies: CompanyWithShares[]) => {
         let companyShare: CompanyShare | undefined;
@@ -209,7 +208,7 @@ const GamePage: React.FC<GameWithCompaniesUsers> = (props) => {
         });
 
         return companyShare;
-    }
+    };
 
     const handleAdd = async (companyId: number, quantity: number) => {
 
@@ -246,17 +245,36 @@ const GamePage: React.FC<GameWithCompaniesUsers> = (props) => {
         setAnchorEl(null);
     };
 
-    const handleUserSelected = (userId: Number) => {
-        let user = props.users.find(user => { 
-            if(user.id == userId) 
-                return true;
-            return false; 
-        });
-
+    const handleUserSelected = async (userId: Number) => {
+        let user = users.find(user => user.id == userId); 
         if(!user)
             throw new Error("Couldn't find user");
         window.localStorage.setItem(`lastUserId${props.id}`, userId.toString());
         setSelectedUser(user);
+    };
+
+    const handleReset = async () => {
+        try {
+            const response = await fetch(`/api/user/resetSum?gameId=${props.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+            });
+
+            if(!response.ok){
+                console.error(response.statusText);
+                return;
+            }
+
+            const usersResult = await (response.json() as Promise<User[]>);
+
+            setUsers(usersResult);
+            setSelectedUser(selectedUser => {
+                var currentUser = usersResult.find(user => user.id == selectedUser.id);
+                return currentUser || selectedUser;
+            });
+        } catch (error) {
+            console.error(error);
+        }
     };
 
     return (
@@ -272,7 +290,7 @@ const GamePage: React.FC<GameWithCompaniesUsers> = (props) => {
                 >
                 </IconButton>
                 <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                    Last: {selectedUser.lastPayout} ({selectedUser.cumulativePayout})
+                    Last dividend: {selectedUser.lastPayout} ({selectedUser.cumulativePayout})
                 </Typography>
                 <div>
                     <Button
@@ -299,7 +317,7 @@ const GamePage: React.FC<GameWithCompaniesUsers> = (props) => {
                         open={Boolean(anchorEl)}
                         onClose={handleClose}
                     >
-                        {props.users.map((user) => (
+                        {users.map((user) => (
                         <MenuItem 
                             key={user.id} 
                             onClick={() => { 
@@ -327,7 +345,7 @@ const GamePage: React.FC<GameWithCompaniesUsers> = (props) => {
                 >
                     <Button>Undo</Button>
                     <Button>Redo</Button>
-                    <Button>Reset Sum</Button>
+                    <Button onClick={handleReset}>Reset Sum</Button>
                     <Button>Calculate Final Score</Button>
                 </Box>
                 <Box

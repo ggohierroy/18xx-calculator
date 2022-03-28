@@ -48,16 +48,16 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
     // Create log
     const companyConfig = CompanyConfig[game.gameCode][company.companyCode]
     const payoutPerPlayer: String[] = [];
-
+    const usersResult: User[] = [];
     for(let i = 0; i < company.companyShares.length; i++){
         let share = company.companyShares[i];
 
         const playerPayout = share.quantity * Number(payout);
-        if(playerPayout <= 0)
-            continue;
-
         const total = playerPayout + share.user.cumulativePayout;
-        payoutPerPlayer.push(`${playerPayout} to ${share.user.name} (${total})`);
+        
+        if(playerPayout > 0){
+            payoutPerPlayer.push(`${playerPayout} to ${share.user.name} (${total})`);
+        }
 
         // update user
         const userResult = await prisma.user.update({
@@ -68,7 +68,7 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
             }
         });
         
-        io.to(gameId).emit("user-updated", userResult);
+        usersResult.push(userResult);
     }
 
     const playerPayoutText = payoutPerPlayer.join(", ");
@@ -80,7 +80,10 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
             value: logText
         }
     })
+
+    const sortedUsers = usersResult.sort((a, b) => a.name.localeCompare(b.name));
     
+    io.to(gameId).emit("users-updated", sortedUsers);
     io.to(gameId).emit("company-updated", companyResult);
     io.to(gameId).emit("log-created", logResult);
 

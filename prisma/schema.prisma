@@ -50,8 +50,7 @@ model User {
   companyShares CompanyShare[]
   game Game @relation(fields: [gameId], references: [id])
   gameId Int
-  name String?
-  email String? @unique
+  name String
   lastPayout Int @default(0)
   cumulativePayout Int @default(0)
   @@map(name: "users")
