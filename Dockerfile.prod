@@ -11,6 +11,8 @@ COPY package.json package-lock.json ./
 FROM base as build
 # Removes node_modules and install all dependencies at once
 RUN export NODE_ENV=production
+ENV NODE_OPTIONS --max-old-space-size=4096
+ENV GENERATE_SOURCEMAP false
 RUN npm install
 
 # Copy the rest of our Next.js folder

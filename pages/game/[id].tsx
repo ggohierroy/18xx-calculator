@@ -318,7 +318,21 @@ const GamePage: React.FC<GameWithCompaniesUsers> = (props) => {
                 <Logs gameId={props.id} socket={socket} />
                 <Box
                     sx={{
-                        my: 2,
+                        mt: 1,
+                        gap: 2,
+                        display: 'flex',
+                        flexDirection: 'row',
+                        flexWrap: 'wrap'
+                    }}
+                >
+                    <Button>Undo</Button>
+                    <Button>Redo</Button>
+                    <Button>Reset Sum</Button>
+                    <Button>Calculate Final Score</Button>
+                </Box>
+                <Box
+                    sx={{
+                        mt: 1,
                         gap: 2,
                         display: 'flex',
                         flexDirection: 'row',
