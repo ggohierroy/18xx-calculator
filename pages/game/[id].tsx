@@ -7,9 +7,11 @@ import Router from 'next/router';
 import { CompanyShare, Game, Prisma } from "@prisma/client";
 import Box from "@mui/material/Box";
 import Company from "../../components/Company";
-import { Tab, Tabs, Typography } from "@mui/material";
+import { AppBar, Button, IconButton, Tab, Tabs, Toolbar, Typography } from "@mui/material";
 import { io, Socket } from "socket.io-client";
 import { DefaultEventsMap } from "socket.io/dist/typed-events";
+import Logs from "../../components/Logs";
+import MenuIcon from '@mui/icons-material/Menu';
 
 export const getServerSideProps: GetServerSideProps = async ({ params }) => {
     const game = await prisma.game.findUnique({
@@ -75,7 +77,7 @@ const GamePage: React.FC<GameWithCompaniesUsers> = (props) => {
     };
     const [companies, setCompanies] = React.useState(props.companies);
 
-    let socket: Socket<DefaultEventsMap, DefaultEventsMap>
+    const [socket, setSocket] = React.useState<Socket<DefaultEventsMap, DefaultEventsMap>>();
     React.useEffect(() => { 
         socketInitializer();
         const lastIndexStorage = localStorage.getItem(`lastIndex${props.id}`);
@@ -89,7 +91,8 @@ const GamePage: React.FC<GameWithCompaniesUsers> = (props) => {
     }, []);
     const socketInitializer = async () => {
         await fetch('/api/socket');
-        socket = io();
+        
+        let socket = io();
 
         socket.on('connect', () => {
             socket.emit("join-game", props.id);
@@ -98,6 +101,12 @@ const GamePage: React.FC<GameWithCompaniesUsers> = (props) => {
         socket.on('company-share-updated', (companyShare: CompanyShare) => {
             updateCompanyShare(companyShare);
         })
+
+        socket.on('company-updated', (company: CompanyWithShares) => {
+            updateCompany(company);
+        })
+
+        setSocket(socket);
     }
 
     const companiesPrint = (companies: any) => {
@@ -223,28 +232,44 @@ const GamePage: React.FC<GameWithCompaniesUsers> = (props) => {
     };
 
     return (
-        <Container>
-            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                <Tabs value={tabIndex} onChange={handleChange} aria-label="basic tabs example">
+        <Box>
+            <AppBar position="sticky">
+                <Toolbar>
+                <IconButton
+                    size="large"
+                    edge="start"
+                    color="inherit"
+                    aria-label="menu"
+                    sx={{ mr: 2 }}
+                >
+                </IconButton>
+                <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+                    News
+                </Typography>
+                <Tabs textColor="inherit" TabIndicatorProps={{style: {background:'white'}}} value={tabIndex} onChange={handleChange} aria-label="basic tabs example">
                     {props.users.map((user) => (
                         <Tab key={user.id} label={user.name} {...a11yProps(user.id)} />
                     ))}
                 </Tabs>
-            </Box>
-            <Box
-                sx={{
-                    my: 4,
-                    gap: 2,
-                    display: 'flex',
-                    flexDirection: 'row',
-                    flexWrap: 'wrap'
-                }}
-            >
-                {companies.map((company) => (
-                    <Company key={company.id} gameCode={props.gameCode} company={company} userId={selectedUser.id} onAdd={handleAdd} onConfirmPayout={handlePayout} />
-                ))}
-            </Box>
-        </Container>
+                </Toolbar>
+            </AppBar>
+            <Container>
+                <Logs gameId={props.id} socket={socket} />
+                <Box
+                    sx={{
+                        my: 4,
+                        gap: 2,
+                        display: 'flex',
+                        flexDirection: 'row',
+                        flexWrap: 'wrap'
+                    }}
+                >
+                    {companies.map((company) => (
+                        <Company key={company.id} gameCode={props.gameCode} company={company} userId={selectedUser.id} onAdd={handleAdd} onConfirmPayout={handlePayout} />
+                    ))}
+                </Box>
+            </Container>
+        </Box>
     )
 }
 

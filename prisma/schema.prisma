@@ -14,7 +14,16 @@ model Game {
   id Int @default(autoincrement()) @id
   companies Company[]
   users User[]
+  logs Log[]
   gameCode String
+}
+
+model Log {
+  id Int @default(autoincrement()) @id
+  value String
+  createdTime DateTime @default(now())
+  game Game @relation(fields: [gameId], references: [id])
+  gameId Int
 }
 
 model Company {
@@ -36,15 +45,6 @@ model CompanyShare {
   quantity Int @default(0)
 }
 
-model Post {
-  id Int @default(autoincrement()) @id
-  title String
-  content String?
-  published Boolean @default(false)
-  author User? @relation(fields: [authorId], references: [id])
-  authorId Int?
-}
-
 model User {
   id Int @default(autoincrement()) @id
   companyShares CompanyShare[]
@@ -52,6 +52,7 @@ model User {
   gameId Int
   name String?
   email String? @unique
-  posts Post[]
+  lastPayout Int @default(0)
+  cumulativePayout Int @default(0)
   @@map(name: "users")
 }
