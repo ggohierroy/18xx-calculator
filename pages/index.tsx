@@ -31,17 +31,6 @@ const Home: NextPage = () => {
     }
   };
 
-  const clearAllGames = async () => {
-    try {
-      await fetch('/api/game/clear', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-      });
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
   const [gameCode, setGameCode] = React.useState("1882");
   const handleChange = (event: SelectChangeEvent) => {
     setGameCode(event.target.value as string);
@@ -78,9 +67,6 @@ const Home: NextPage = () => {
         </FormControl>
         <Button variant="contained" onClick={() => { createNewGame(); }}>
           Create New Game
-        </Button>
-        <Button variant="contained" onClick={() => { clearAllGames(); }}>
-          Clear All Games
         </Button>
       </Box>
     </Container>
