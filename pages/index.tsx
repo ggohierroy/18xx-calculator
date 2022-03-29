@@ -2,20 +2,23 @@ import type { NextPage } from 'next';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
-import { Button } from '@mui/material';
+import { Button, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent } from '@mui/material';
 import Router from 'next/router';
 import { Game } from '@prisma/client';
+import React from 'react';
 
 const Home: NextPage = () => {
 
   const createNewGame = async () => {
     try {
+      const body = { gameCode: gameCode };
       const response = await fetch('/api/game', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
       });
 
-      if(!response.ok){
+      if (!response.ok) {
         console.error(response.statusText);
         return;
       }
@@ -28,7 +31,7 @@ const Home: NextPage = () => {
     }
   };
 
-  const clearAllGames = async() => {
+  const clearAllGames = async () => {
     try {
       await fetch('/api/game/clear', {
         method: 'POST',
@@ -37,6 +40,11 @@ const Home: NextPage = () => {
     } catch (error) {
       console.error(error);
     }
+  };
+
+  const [gameCode, setGameCode] = React.useState("1882");
+  const handleChange = (event: SelectChangeEvent) => {
+    setGameCode(event.target.value as string);
   };
 
   return (
@@ -54,10 +62,24 @@ const Home: NextPage = () => {
         <Typography variant="h4" component="h1" gutterBottom>
           18xx Calculator
         </Typography>
-        <Button variant="contained" onClick={ () => { createNewGame(); } }>
+        <FormControl>
+          <InputLabel id="demo-simple-select-label">Game</InputLabel>
+          <Select
+            labelId="demo-simple-select-label"
+            id="demo-simple-select"
+            value={gameCode}
+            label="Game"
+            onChange={handleChange}
+          >
+            <MenuItem value={"1882"}>1882</MenuItem>
+            <MenuItem value={"18Chesapeake"}>18Chesapeake</MenuItem>
+            <MenuItem value={"1849"}>1849</MenuItem>
+          </Select>
+        </FormControl>
+        <Button variant="contained" onClick={() => { createNewGame(); }}>
           Create New Game
         </Button>
-        <Button variant="contained" onClick={ () => { clearAllGames(); } }>
+        <Button variant="contained" onClick={() => { clearAllGames(); }}>
           Clear All Games
         </Button>
       </Box>

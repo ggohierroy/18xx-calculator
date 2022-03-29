@@ -71,7 +71,7 @@ const Company = ({ gameCode, company, userId, onAdd, onConfirmPayout }: CompanyW
         }}>
             <CardHeader
                 title={config.name}
-                titleTypographyProps={{ variant: 'h6' }}
+                titleTypographyProps={{ variant: 'body1' }}
                 subheader={config.shortName}
             />
             <CardActions disableSpacing>

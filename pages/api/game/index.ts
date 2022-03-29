@@ -2,10 +2,10 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import prisma from '../../../lib/prisma';
 import CompanyConfig from '../../../company-configs/company-configs';
 
-// POST /api/companyShare
+// POST /api/game
 export default async function handle(req: NextApiRequest, res: NextApiResponse) {
 
-    const gameCode = "1822";
+    const { gameCode } = req.body;
     const numberOfPlayers = 4;
 
     // create a new game

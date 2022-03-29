@@ -10,7 +10,7 @@ type CompanyConfigOption = {
 }
 
 const CompanyConfig: CompanyConfigOption = {
-    "1822": {
+    "1882": {
         "canadian-national": {
             "companyCode": "canadian-national",
             "name": "Canadian National",
@@ -52,6 +52,94 @@ const CompanyConfig: CompanyConfigOption = {
             "name": "Saskatchewan Central Railroad",
             "shortName": "SC",
             "color": "#0189D1"
+        }
+    },
+    "18Chesapeake": {
+        "baltimore-ohio-railroad": {
+            "companyCode": "baltimore-ohio-railroad",
+            "name": "Baltimore & Ohio Railroad",
+            "shortName": "B&O",
+            "color": "#0189D1"
+        },
+        "camden-amboy-railroad": {
+            "companyCode": "camden-amboy-railroad",
+            "name": "Camden & Amboy Railroad",
+            "shortName": "C&A",
+            "color": "#F48221"
+        },
+        "chesapeake-ohio-railroad": {
+            "companyCode": "chesapeake-ohio-railroad",
+            "name": "Chesapeake & Ohio Railroad",
+            "shortName": "C&O",
+            "color": "#A2DCED"
+        },
+        "lehigh-valley-railroad": {
+            "companyCode": "lehigh-valley-railroad",
+            "name": "Lehigh Valley Railroad",
+            "shortName": "LV",
+            "color": "#FFF500"
+        },
+        "norfolk-western-railway": {
+            "companyCode": "norfolk-western-railway",
+            "name": "Norfolk & Western Railway",
+            "shortName": "N&W",
+            "color": "#7B352A"
+        },
+        "pittsburgh-lake-erie-railroad": {
+            "companyCode": "pittsburgh-lake-erie-railroad",
+            "name": "Pittsburgh and Lake Erie Railroad",
+            "shortName": "PLE",
+            "color": "#000000"
+        },
+        "pennsylvania-railroad": {
+            "companyCode": "pennsylvania-railroad",
+            "name": "Pennsylvania Railroad",
+            "shortName": "PRR",
+            "color": "#237333"
+        },
+        "strasburg-rail-road": {
+            "companyCode": "strasburg-rail-road",
+            "name": "Strasburg Rail Road",
+            "shortName": "SRR",
+            "color": "#D81E3E"
+        }
+    },
+    "1849": {
+        "azienda-ferroviaria-garibaldi": {
+            "companyCode": "azienda-ferroviaria-garibaldi",
+            "name": "Azienda Ferroviaria Garibaldi",
+            "shortName": "AFG",
+            "color": "#FF0000"
+        },
+        "canadian-northern": {
+            "companyCode": "impresa-ferroviaria-trinacria",
+            "name": "Impresa Ferroviaria Trinacria",
+            "shortName": "IFT",
+            "color": "#0189D1"
+        },
+        "compagnia-trasporti-lilibeo": {
+            "companyCode": "compagnia-trasporti-lilibeo",
+            "name": "Compagnia Trasporti Lilibeo",
+            "shortName": "CTL",
+            "color": "#F9B231"
+        },
+        "rete-centrale-sicula": {
+            "companyCode": "rete-centrale-sicula",
+            "name": "Rete Centrale Sicula",
+            "shortName": "RCS",
+            "color": "#F48221"
+        },
+        "azienda-transporti-archimede": {
+            "companyCode": "azienda-transporti-archimede",
+            "name": "Azienda Trasporti Archimede",
+            "shortName": "ATA",
+            "color": "#008000"
+        },
+        "societa-ferroviaria-akragas": {
+            "companyCode": "societa-ferroviaria-akragas",
+            "name": "Società Ferroviaria Akragas",
+            "shortName": "SFA",
+            "color": "#FFC0CB"
         }
     }
 }
