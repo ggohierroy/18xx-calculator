@@ -1,6 +1,6 @@
 import { Add, Remove } from "@mui/icons-material";
 import { Box, Button, ButtonGroup, Card, CardActions, CardHeader, IconButton, Modal, TextField, Typography } from "@mui/material";
-import { Company, CompanyShare } from "@prisma/client";
+import { Company, CompanyShare, User } from "@prisma/client";
 import React from "react";
 import CompanyConfig from "../company-configs/company-configs";
 
@@ -10,7 +10,7 @@ type CompanyWithCode = {
     company: (Company & {
         companyShares: CompanyShare[];
     });
-    userId: number;
+    selectedUser: User;
     onAdd: (companyId: number, quantity: number) => {}
     onConfirmPayout: (companyId: number, payout: number) => {}
 };
@@ -29,14 +29,14 @@ const modalStyle = {
 
 // Component is a function that returns a JSX Element
 // JSX Element can be inferred, but this makes it more obvious
-const Company = ({ gameCode, company, userId, onAdd, onConfirmPayout }: CompanyWithCode): JSX.Element => {
+const Company = ({ gameCode, company, selectedUser, onAdd, onConfirmPayout }: CompanyWithCode): JSX.Element => {
 
     const gameConfig = CompanyConfig[gameCode];
     const config = gameConfig[company.companyCode];
-    const shares = company.companyShares.find((value, index) => { return value.userId == userId });
+    const shares = company.companyShares.find((value, index) => { return value.userId == selectedUser.id });
 
     if (!shares)
-        throw new Error(`Couldn't find any shares for user ${userId} and company ${company.id}`);
+        throw new Error(`Couldn't find any shares for user ${selectedUser.id} and company ${company.id}`);
 
     const handleAdd = async () => {
         onAdd(company.id, 1);
@@ -44,6 +44,13 @@ const Company = ({ gameCode, company, userId, onAdd, onConfirmPayout }: CompanyW
     const handleRemove = async () => {
         onAdd(company.id, -1);
     };
+    const handleAddCompany = async () => {
+        //onAdd(company.id, 1);
+    };
+    const handleRemoveCompany = async () => {
+        //onAdd(company.id, -1);
+    };
+
     const handleMinus5 = async () => { setPayoutAmount(payoutAmount - 5); };
     const handleMinus1 = async () => { setPayoutAmount(payoutAmount - 1); };
     const handlePlus5 = async () => { setPayoutAmount(payoutAmount + 5); };
@@ -67,14 +74,30 @@ const Company = ({ gameCode, company, userId, onAdd, onConfirmPayout }: CompanyW
         <Card sx={{
             border: 4,
             borderColor: config.color,
-            maxWidth: 200
+            width: 240
         }}>
             <CardHeader
                 title={config.name}
-                titleTypographyProps={{ variant: 'body1' }}
+                titleTypographyProps={{ variant: 'body2', noWrap: true, component: "div", width: 200 }}
+                subheaderTypographyProps={{ variant: 'subtitle2' }}
                 subheader={config.shortName}
+                sx={{pb:0}}
             />
-            <CardActions disableSpacing>
+            <CardActions sx={{py:0}} disableSpacing={true}>
+                <IconButton aria-label="decrease company paying share" onClick={handleRemoveCompany}>
+                    <Remove />
+                </IconButton>
+                <IconButton aria-label="increase company paying share" onClick={handleAddCompany}>
+                    <Add />
+                </IconButton>
+                <Typography align="right" sx={{
+                    padding: 1,
+                    width: 1
+                }}>
+                    {config.shortName}: {company.companyPayingShares}
+                </Typography>
+            </CardActions>
+            <CardActions sx={{py:0}} disableSpacing={true}>
                 <IconButton aria-label="decrease share" onClick={handleRemove}>
                     <Remove />
                 </IconButton>
@@ -85,10 +108,10 @@ const Company = ({ gameCode, company, userId, onAdd, onConfirmPayout }: CompanyW
                     padding: 1,
                     width: 1
                 }}>
-                    {shares.quantity}
+                    You: {shares.quantity}
                 </Typography>
             </CardActions>
-            <CardActions disableSpacing>
+            <CardActions disableSpacing={true}>
                 <Button onClick={handleOpen} size="small" color="primary" variant="contained">
                     Pay
                 </Button>

@@ -124,6 +124,7 @@ const GamePage: React.FC<GameWithCompaniesUsers> = (props) => {
         });
     };
 
+    // Called when there is a payout so the last payout can be updated
     const updateCompany = async (newCompany: CompanyWithShares) => {
         setCompanies(companies => {
             const newCompanies = companies.map((company) => {
@@ -136,6 +137,7 @@ const GamePage: React.FC<GameWithCompaniesUsers> = (props) => {
         });
     };
 
+    // Called when number of shares for a player is changed
     const updateCompanyShare = async (newCompanyShare: CompanyShare) => {
         setCompanies(companies => {
             const newCompanies = companies.map((company) => {
@@ -358,7 +360,7 @@ const GamePage: React.FC<GameWithCompaniesUsers> = (props) => {
                     }}
                 >
                     {companies.map((company) => (
-                        <Company key={company.id} gameCode={props.gameCode} company={company} userId={selectedUser.id} onAdd={handleAdd} onConfirmPayout={handlePayout} />
+                        <Company key={company.id} gameCode={props.gameCode} company={company} selectedUser={selectedUser} onAdd={handleAdd} onConfirmPayout={handlePayout} />
                     ))}
                 </Box>
             </Container>
