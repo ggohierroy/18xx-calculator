@@ -33,6 +33,8 @@ model Company {
   companyPayingShares Int @default(0)
   companyCode String
   lastPayout Int @default(0)
+  lastReceived Int @default(0)
+  cumulativeReceived Int @default(0)
   companyShares CompanyShare[]
 }
 

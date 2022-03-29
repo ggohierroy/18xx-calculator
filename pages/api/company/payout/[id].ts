@@ -8,7 +8,7 @@ import { User } from '@prisma/client';
 // PUT /api/company/payout
 export default async function handle(req: NextApiRequest, res: NextApiResponse) {
     const companyId = req.query.id;
-    const { payout, gameId } = req.body;
+    const { payout, gameId } = req.body as { payout: number, gameId: number };
 
     const game = await prisma.game.findUnique({
         where: { id: gameId}
@@ -31,19 +31,6 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
 
     if(!company)
         throw new Error(`Couldn't find company`);
-
-    let io = (res as any).socket.server.io as Server<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>;
-
-    // update last payout
-    const companyResult = await prisma.company.update({
-        where: { id: Number(companyId) },
-        include: {
-            companyShares: true
-        },
-        data: {
-            lastPayout: payout
-        }
-    })
 
     // Create log
     const companyConfig = CompanyConfig[game.gameCode][company.companyCode]
@@ -71,6 +58,23 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
         usersResult.push(userResult);
     }
 
+    // update last payout
+    const companyPayout = payout * company.companyPayingShares;
+    const total = company.cumulativeReceived + companyPayout
+    if(companyPayout > 0)
+        payoutPerPlayer.push(`${companyPayout} to ${companyConfig.shortName} (${total})`);
+    const companyResult = await prisma.company.update({
+        where: { id: Number(companyId) },
+        include: {
+            companyShares: true
+        },
+        data: {
+            lastPayout: payout,
+            lastReceived: companyPayout,
+            cumulativeReceived: total
+        }
+    })
+
     const playerPayoutText = payoutPerPlayer.join(", ");
     const logText = `${companyConfig.shortName} pays out ${payout} per share: ${playerPayoutText}`;
 
@@ -82,10 +86,11 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
     })
 
     const sortedUsers = usersResult.sort((a, b) => a.name.localeCompare(b.name));
-    
-    io.to(gameId).emit("users-updated", sortedUsers);
-    io.to(gameId).emit("company-updated", companyResult);
-    io.to(gameId).emit("log-created", logResult);
+
+    let io = (res as any).socket.server.io as Server<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>;
+    io.to(gameId.toString()).emit("users-updated", sortedUsers);
+    io.to(gameId.toString()).emit("company-updated", companyResult);
+    io.to(gameId.toString()).emit("log-created", logResult);
 
     res.json(companyResult);
 }

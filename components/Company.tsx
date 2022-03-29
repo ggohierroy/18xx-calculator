@@ -11,8 +11,9 @@ type CompanyWithCode = {
         companyShares: CompanyShare[];
     });
     selectedUser: User;
-    onAdd: (companyId: number, quantity: number) => {}
-    onConfirmPayout: (companyId: number, payout: number) => {}
+    onAdd: (companyId: number, quantity: number) => {};
+    onAddCompany: (companyId: number, quantity: number) => {};
+    onConfirmPayout: (companyId: number, payout: number) => {};
 };
 
 const modalStyle = {
@@ -29,11 +30,12 @@ const modalStyle = {
 
 // Component is a function that returns a JSX Element
 // JSX Element can be inferred, but this makes it more obvious
-const Company = ({ gameCode, company, selectedUser, onAdd, onConfirmPayout }: CompanyWithCode): JSX.Element => {
+const Company = ({ gameCode, company, selectedUser, onAdd, onAddCompany, onConfirmPayout }: CompanyWithCode): JSX.Element => {
 
     const gameConfig = CompanyConfig[gameCode];
     const config = gameConfig[company.companyCode];
     const shares = company.companyShares.find((value, index) => { return value.userId == selectedUser.id });
+    const subHeader = `${config.shortName} - Last dividend: ${company.lastReceived} (${company.cumulativeReceived})`
 
     if (!shares)
         throw new Error(`Couldn't find any shares for user ${selectedUser.id} and company ${company.id}`);
@@ -45,10 +47,10 @@ const Company = ({ gameCode, company, selectedUser, onAdd, onConfirmPayout }: Co
         onAdd(company.id, -1);
     };
     const handleAddCompany = async () => {
-        //onAdd(company.id, 1);
+        onAddCompany(company.id, 1);
     };
     const handleRemoveCompany = async () => {
-        //onAdd(company.id, -1);
+        onAddCompany(company.id, -1);
     };
 
     const handleMinus5 = async () => { setPayoutAmount(payoutAmount - 5); };
@@ -79,8 +81,8 @@ const Company = ({ gameCode, company, selectedUser, onAdd, onConfirmPayout }: Co
             <CardHeader
                 title={config.name}
                 titleTypographyProps={{ variant: 'body2', noWrap: true, component: "div", width: 200 }}
-                subheaderTypographyProps={{ variant: 'subtitle2' }}
-                subheader={config.shortName}
+                subheaderTypographyProps={{ variant: 'subtitle2'}}
+                subheader={subHeader}
                 sx={{pb:0}}
             />
             <CardActions sx={{py:0}} disableSpacing={true}>

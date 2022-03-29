@@ -1,18 +1,14 @@
 import React from "react"
 import { GetServerSideProps } from "next"
-import ReactMarkdown from "react-markdown"
 import Container from "@mui/material/Container"
 import prisma from '../../lib/prisma';
-import Router from 'next/router';
-import { CompanyShare, Game, Prisma, User } from "@prisma/client";
+import { CompanyShare, Prisma, User } from "@prisma/client";
 import Box from "@mui/material/Box";
 import Company from "../../components/Company";
-import { AppBar, Button, IconButton, Menu, MenuItem, Tab, Tabs, Toolbar, Typography } from "@mui/material";
+import { AppBar, Button, IconButton, Menu, MenuItem, Toolbar, Typography } from "@mui/material";
 import { io, Socket } from "socket.io-client";
 import { DefaultEventsMap } from "socket.io/dist/typed-events";
 import Logs from "../../components/Logs";
-import MenuIcon from '@mui/icons-material/Menu';
-import { AccountCircle } from "@mui/icons-material";
 
 export const getServerSideProps: GetServerSideProps = async ({ params }) => {
     const game = await prisma.game.findUnique({
@@ -111,6 +107,10 @@ const GamePage: React.FC<GameWithCompaniesUsers> = (props) => {
 
         socket.on('users-updated', (users: User[]) => {
             updateUsers(users);
+        })
+
+        socket.on('companies-updated', (companies: CompanyWithShares[]) => {
+            setCompanies(companies);
         })
 
         setSocket(socket);
@@ -237,6 +237,29 @@ const GamePage: React.FC<GameWithCompaniesUsers> = (props) => {
         }
     };
 
+    const handleAddCompany = async (companyId: number, quantity: number) => {
+        const company = getCompany(companyId, companies);
+        if(!company)
+            throw new Error(`No company was found.`);
+
+        const newCompany = {
+            ...company,
+            companyPayingShares: company.companyPayingShares + quantity
+        }
+        updateCompany(newCompany);
+
+        try {
+            const body = { quantity: newCompany.companyPayingShares, gameId: props.id };
+            await fetch(`/api/company/${newCompany.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body),
+            });
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 
     const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
@@ -257,7 +280,8 @@ const GamePage: React.FC<GameWithCompaniesUsers> = (props) => {
 
     const handleReset = async () => {
         try {
-            const response = await fetch(`/api/user/resetSum?gameId=${props.id}`, {
+            // reset users
+            const response = await fetch(`/api/game/resetSum/${props.id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
             });
@@ -267,13 +291,15 @@ const GamePage: React.FC<GameWithCompaniesUsers> = (props) => {
                 return;
             }
 
-            const usersResult = await (response.json() as Promise<User[]>);
+            const { usersResult, companiesResult } = await (response.json() as Promise<{usersResult: User[], companiesResult: CompanyWithShares[]}>);
 
             setUsers(usersResult);
             setSelectedUser(selectedUser => {
-                var currentUser = usersResult.find(user => user.id == selectedUser.id);
+                let currentUser = usersResult.find(user => user.id == selectedUser.id);
                 return currentUser || selectedUser;
             });
+            setCompanies(companiesResult);
+
         } catch (error) {
             console.error(error);
         }
@@ -360,7 +386,7 @@ const GamePage: React.FC<GameWithCompaniesUsers> = (props) => {
                     }}
                 >
                     {companies.map((company) => (
-                        <Company key={company.id} gameCode={props.gameCode} company={company} selectedUser={selectedUser} onAdd={handleAdd} onConfirmPayout={handlePayout} />
+                        <Company key={company.id} gameCode={props.gameCode} company={company} selectedUser={selectedUser} onAdd={handleAdd} onAddCompany={handleAddCompany} onConfirmPayout={handlePayout} />
                     ))}
                 </Box>
             </Container>

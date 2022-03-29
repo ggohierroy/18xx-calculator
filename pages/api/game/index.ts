@@ -5,7 +5,7 @@ import CompanyConfig from '../../../company-configs/company-configs';
 // POST /api/game
 export default async function handle(req: NextApiRequest, res: NextApiResponse) {
 
-    const { gameCode } = req.body;
+    const { gameCode } = req.body as { gameCode: string };
     const numberOfPlayers = 4;
 
     // create a new game
