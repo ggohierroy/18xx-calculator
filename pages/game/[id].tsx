@@ -303,6 +303,46 @@ const GamePage: React.FC<GameWithCompaniesUsers> = (props) => {
     const handleOpenModal = () => setOpen(true);
     const handleCloseModal = () => setOpen(false);
 
+    const handleShareValueChange = async (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, companyId: number) => {
+        const shareValue = parseInt(event.target.value);
+        const company = getCompany(companyId, companies);
+        if(!company)
+            throw new Error(`No company was found.`);
+
+        const newCompany = {
+            ...company,
+            shareValue: shareValue
+        }
+        updateCompany(newCompany);
+    };
+
+    const handleCashChange = async (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, userId: number) => {
+        const cash = parseInt(event.target.value);
+        setUsers(users => {
+            return users.map(user => {
+                if(user.id != userId)
+                    return user;
+                return {
+                    ...user,
+                    cash: cash
+                }
+            })
+        });
+    };
+
+    const handleCalculateScore = async () => {
+        setOpen(false);
+        try {
+            await fetch(`/api/game/calculate-score/${props.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ users: users, companies: companies })
+            });
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
     return (
         <Box>
             <AppBar position="sticky">
@@ -385,8 +425,8 @@ const GamePage: React.FC<GameWithCompaniesUsers> = (props) => {
                                 id="outlined-basic" 
                                 label={`${CompanyConfig[props.gameCode][company.companyCode].shortName} Share Value`}
                                 variant="outlined" 
-                                //value={payoutAmount} 
-                                //onChange={handleChange}
+                                value={company.shareValue} 
+                                onChange={(e) => { handleShareValueChange(e, company.id) }}
                                 type="number"
                                 InputLabelProps={{
                                     shrink: true,
@@ -404,8 +444,8 @@ const GamePage: React.FC<GameWithCompaniesUsers> = (props) => {
                                 id="outlined-basic" 
                                 label={`${user.name} Cash`}
                                 variant="outlined" 
-                                //value={payoutAmount} 
-                                //onChange={handleChange}
+                                value={user.cash}
+                                onChange={(e) => { handleCashChange(e, user.id) }}
                                 type="number"
                                 InputLabelProps={{
                                     shrink: true,
@@ -416,7 +456,7 @@ const GamePage: React.FC<GameWithCompaniesUsers> = (props) => {
                             ))}
                         </DialogContent>
                         <DialogActions>
-                            <Button variant="contained">Confirm</Button>
+                            <Button onClick={handleCalculateScore} variant="contained">Confirm</Button>
                         </DialogActions>
                     </Dialog>
                 </Box>

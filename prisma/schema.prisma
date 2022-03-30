@@ -36,6 +36,7 @@ model Company {
   lastReceived Int @default(0)
   cumulativeReceived Int @default(0)
   companyShares CompanyShare[]
+  shareValue Int?
 }
 
 model CompanyShare {
@@ -56,4 +57,5 @@ model User {
   lastPayout Int @default(0)
   cumulativePayout Int @default(0)
   @@map(name: "users")
+  cash Int?
 }
