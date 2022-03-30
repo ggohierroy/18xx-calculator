@@ -1,7 +1,7 @@
 import { Box, Typography } from "@mui/material";
 import { Log } from "@prisma/client";
 import React from "react";
-import { io, Socket } from "socket.io-client";
+import { Socket } from "socket.io-client";
 import { DefaultEventsMap } from "socket.io/dist/typed-events";
 
 type LogsProps = {
@@ -11,6 +11,11 @@ type LogsProps = {
 
 const Logs = ({ gameId, socket }: LogsProps): JSX.Element => {
     const [logs, setLogs] = React.useState<Log[]>();
+    const dateTimeFormat = new Intl.DateTimeFormat("fr-FR", {
+        hour: 'numeric', 
+        minute: 'numeric',
+        hour12: false
+    })
     const messagesEndRef = React.useRef<null | HTMLDivElement>(null);
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: 'nearest', inline: 'start' })
@@ -68,7 +73,7 @@ const Logs = ({ gameId, socket }: LogsProps): JSX.Element => {
         }}>
             {typeof logs != "undefined" 
                 ? logs.map((log) => (
-                    <Typography key={log.id}>[Log] {log.value}</Typography>
+                    <Typography key={log.id}>[{dateTimeFormat.format(new Date(log.createdTime))}] {log.value}</Typography>
                     ))
                 : <Typography>Loading...</Typography>
             }

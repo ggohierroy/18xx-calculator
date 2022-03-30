@@ -5,10 +5,11 @@ import prisma from '../../lib/prisma';
 import { CompanyShare, Prisma, User } from "@prisma/client";
 import Box from "@mui/material/Box";
 import Company from "../../components/Company";
-import { AppBar, Button, IconButton, Menu, MenuItem, Toolbar, Typography } from "@mui/material";
+import { AppBar, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, IconButton, Menu, MenuItem, Modal, TextField, Toolbar, Typography } from "@mui/material";
 import { io, Socket } from "socket.io-client";
 import { DefaultEventsMap } from "socket.io/dist/typed-events";
 import Logs from "../../components/Logs";
+import CompanyConfig from "../../company-configs/company-configs";
 
 export const getServerSideProps: GetServerSideProps = async ({ params }) => {
     const game = await prisma.game.findUnique({
@@ -59,13 +60,6 @@ type CompanyWithShares = Prisma.CompanyGetPayload<{
         companyShares: true
     }
 }>
-
-function a11yProps(index: number) {
-    return {
-        id: `simple-tab-${index}`,
-        'aria-controls': `simple-tabpanel-${index}`,
-    };
-}
 
 const GamePage: React.FC<GameWithCompaniesUsers> = (props) => {
 
@@ -305,6 +299,10 @@ const GamePage: React.FC<GameWithCompaniesUsers> = (props) => {
         }
     };
 
+    const [open, setOpen] = React.useState(false);
+    const handleOpenModal = () => setOpen(true);
+    const handleCloseModal = () => setOpen(false);
+
     return (
         <Box>
             <AppBar position="sticky">
@@ -374,7 +372,53 @@ const GamePage: React.FC<GameWithCompaniesUsers> = (props) => {
                     <Button>Undo</Button>
                     <Button>Redo</Button>
                     <Button onClick={handleReset}>Reset Sum</Button>
-                    <Button>Calculate Final Score</Button>
+                    <Button onClick={handleOpenModal}>Calculate Final Score</Button>
+                    <Dialog open={open} onClose={handleCloseModal} maxWidth={'xs'} fullWidth={true} >
+                        <DialogTitle>Calculate Final Score</DialogTitle>
+                        <DialogContent>
+                            <DialogContentText>
+                                Company Share Values
+                            </DialogContentText>
+                            {companies.map((company) => (
+                            <TextField 
+                                key={company.id}
+                                id="outlined-basic" 
+                                label={`${CompanyConfig[props.gameCode][company.companyCode].shortName} Share Value`}
+                                variant="outlined" 
+                                //value={payoutAmount} 
+                                //onChange={handleChange}
+                                type="number"
+                                InputLabelProps={{
+                                    shrink: true,
+                                }} 
+                                margin="dense"
+                                fullWidth
+                            />
+                            ))}
+                            <DialogContentText>
+                                Player Cash on Hand
+                            </DialogContentText>
+                            {users.map((user) => (
+                            <TextField 
+                                key={user.id}
+                                id="outlined-basic" 
+                                label={`${user.name} Cash`}
+                                variant="outlined" 
+                                //value={payoutAmount} 
+                                //onChange={handleChange}
+                                type="number"
+                                InputLabelProps={{
+                                    shrink: true,
+                                }} 
+                                margin="dense"
+                                fullWidth
+                            />
+                            ))}
+                        </DialogContent>
+                        <DialogActions>
+                            <Button variant="contained">Confirm</Button>
+                        </DialogActions>
+                    </Dialog>
                 </Box>
                 <Box
                     sx={{

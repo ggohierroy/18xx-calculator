@@ -1,5 +1,5 @@
 import { Add, Remove } from "@mui/icons-material";
-import { Box, Button, ButtonGroup, Card, CardActions, CardHeader, IconButton, Modal, TextField, Typography } from "@mui/material";
+import { Box, Button, ButtonGroup, Card, CardActions, CardHeader, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, IconButton, Modal, TextField, Typography } from "@mui/material";
 import { Company, CompanyShare, User } from "@prisma/client";
 import React from "react";
 import CompanyConfig from "../company-configs/company-configs";
@@ -15,18 +15,6 @@ type CompanyWithCode = {
     onAddCompany: (companyId: number, quantity: number) => {};
     onConfirmPayout: (companyId: number, payout: number) => {};
 };
-
-const modalStyle = {
-    position: 'absolute' as 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    width: 400,
-    bgcolor: 'background.paper',
-    border: '2px solid #000',
-    boxShadow: 24,
-    p: 4,
-  };
 
 // Component is a function that returns a JSX Element
 // JSX Element can be inferred, but this makes it more obvious
@@ -118,39 +106,37 @@ const Company = ({ gameCode, company, selectedUser, onAdd, onAddCompany, onConfi
                     Pay
                 </Button>
                 <Typography sx={{ml:1}} variant="caption">Last: {company.lastPayout} per share</Typography>
-                <Modal
-                open={open}
-                onClose={handleClose}
-                aria-labelledby="modal-modal-title"
-                aria-describedby="modal-modal-description"
-                >
-                <Box sx={modalStyle}>
-                    <Typography id="modal-modal-title" variant="h6" component="h2">
-                    {config.name} Payout
-                    </Typography>
-                    <TextField 
-                        id="standard-basic" 
-                        label="Per Share Amount" 
-                        variant="standard" 
-                        value={payoutAmount} 
-                        onChange={handleChange}
-                        type="number"
-                        InputLabelProps={{
-                            shrink: true,
-                        }} 
-                    />
-                    <Typography id="modal-modal-description" sx={{ mt: 1 }}>
-                    Last payout: {company.lastPayout} per share
-                    </Typography>
-                    <ButtonGroup sx={{mt: 1}}variant="outlined" aria-label="outlined button group">
-                        <Button onClick={handleMinus5}>-5</Button>
-                        <Button onClick={handleMinus1}>-1</Button>
-                        <Button onClick={handlePlus1}>+1</Button>
-                        <Button onClick={handlePlus5}>+5</Button>
-                    </ButtonGroup>
-                    <Button onClick={handleConfirm} variant="contained" fullWidth={true} sx={{mt: 1}}>Confirm</Button>
-                </Box>
-                </Modal>
+                <Dialog open={open} onClose={handleClose} maxWidth={'xs'} fullWidth={true} >
+                    <DialogTitle>{config.name} Payout</DialogTitle>
+                    <DialogContent>
+                        <DialogContentText>
+                            Last payout: {company.lastPayout} per share
+                        </DialogContentText>
+                        <TextField 
+                            id="per-share-amount" 
+                            label="Per Share Amount" 
+                            variant="standard" 
+                            value={payoutAmount} 
+                            onChange={handleChange}
+                            type="number"
+                            InputLabelProps={{
+                                shrink: true,
+                            }} 
+                            margin="dense"
+                            autoFocus
+                            fullWidth
+                        />
+                        <ButtonGroup sx={{mt: 1}}variant="outlined" aria-label="outlined button group">
+                            <Button onClick={handleMinus5}>-5</Button>
+                            <Button onClick={handleMinus1}>-1</Button>
+                            <Button onClick={handlePlus1}>+1</Button>
+                            <Button onClick={handlePlus5}>+5</Button>
+                        </ButtonGroup>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleConfirm} variant="contained">Confirm</Button>
+                    </DialogActions>
+                </Dialog>
             </CardActions>
         </Card>
     );
