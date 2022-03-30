@@ -5,8 +5,7 @@ import CompanyConfig from '../../../company-configs/company-configs';
 // POST /api/game
 export default async function handle(req: NextApiRequest, res: NextApiResponse) {
 
-    const { gameCode } = req.body as { gameCode: string };
-    const numberOfPlayers = 4;
+    const { gameCode, playerNames } = req.body as { gameCode: string, playerNames: { number: number, name: string | null }[] };
 
     // create a new game
     const game = await prisma.game.create({
@@ -27,12 +26,9 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
     })
 
     // insert users/players
-    let usersData = [
-        { gameId: game.id, name: "Gabriel" },
-        { gameId: game.id, name: "Julien" },
-        { gameId: game.id, name: "Daniel" },
-        { gameId: game.id, name: "David" }
-    ];
+    let usersData = playerNames.map(playerName => {
+        return { gameId: game.id, name: playerName.name || `Player ${playerName.number}`}
+    });
 
     const resultUsers = await prisma.user.createMany({
         data: usersData

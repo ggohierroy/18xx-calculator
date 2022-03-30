@@ -23,7 +23,7 @@ const Company = ({ gameCode, company, selectedUser, onAdd, onAddCompany, onConfi
     const gameConfig = CompanyConfig[gameCode];
     const config = gameConfig[company.companyCode];
     const shares = company.companyShares.find((value, index) => { return value.userId == selectedUser.id });
-    const subHeader = `${config.shortName} - Last dividend: ${company.lastReceived} (${company.cumulativeReceived})`
+    const subHeader = `${config.shortName} - Last received: ${company.lastReceived} (${company.cumulativeReceived})`
 
     if (!shares)
         throw new Error(`Couldn't find any shares for user ${selectedUser.id} and company ${company.id}`);
