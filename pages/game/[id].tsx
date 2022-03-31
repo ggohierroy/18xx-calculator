@@ -10,6 +10,7 @@ import { io, Socket } from "socket.io-client";
 import { DefaultEventsMap } from "socket.io/dist/typed-events";
 import Logs from "../../components/Logs";
 import CompanyConfig from "../../company-configs/company-configs";
+import Router from 'next/router';
 
 export const getServerSideProps: GetServerSideProps = async ({ params }) => {
     const game = await prisma.game.findUnique({
@@ -22,7 +23,11 @@ export const getServerSideProps: GetServerSideProps = async ({ params }) => {
                     companyCode: "asc"
                 },
                 include: {
-                    companyShares: true
+                    companyShares: {
+                        orderBy: {
+                            id: "asc"
+                        }
+                    }
                 }
             },
             users: {
@@ -67,6 +72,31 @@ const GamePage: React.FC<GameWithCompaniesUsers> = (props) => {
     const [companies, setCompanies] = React.useState(props.companies);
     const [users, setUsers] = React.useState(props.users);
     const [socket, setSocket] = React.useState<Socket<DefaultEventsMap, DefaultEventsMap>>();
+
+    React.useEffect(() => {
+
+        // Check if users are the same
+        const sameUsers = JSON.stringify(props.users) == JSON.stringify(users);
+
+        // if not the same, update current state
+        if(!sameUsers){
+            console.log("users have changed, updating state!");
+            setUsers(props.users);
+            setSelectedUser(selectedUser => {
+                var currentUser = props.users.find(user => user.id == selectedUser.id);
+                return currentUser || selectedUser;
+            });
+        }
+
+        // check if companies are the same
+        let sameCompanies = JSON.stringify(props.companies) == JSON.stringify(companies);
+
+        if(!sameCompanies){
+            console.log("companies have changed, updating state!");
+            setCompanies(props.companies);
+        }
+
+    }, [props.companies, props.users]);
     
     React.useEffect(() => { 
         socketInitializer();
@@ -89,6 +119,10 @@ const GamePage: React.FC<GameWithCompaniesUsers> = (props) => {
 
         socket.on('connect', () => {
             socket.emit("join-game", props.id);
+        })
+
+        socket.io.on('reconnect', () => {
+            Router.replace(Router.asPath);
         })
 
         socket.on('company-share-updated', (companyShare: CompanyShare) => {

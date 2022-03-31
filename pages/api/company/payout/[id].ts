@@ -66,7 +66,11 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
     const companyResult = await prisma.company.update({
         where: { id: Number(companyId) },
         include: {
-            companyShares: true
+            companyShares: {
+                orderBy: {
+                    id: "asc"
+                }
+            }
         },
         data: {
             lastPayout: payout,

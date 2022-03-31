@@ -14,7 +14,7 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
             companyPayingShares: quantity,
         },
         include: {
-            companyShares: true
+            companyShares: true,
         }
     });
 

@@ -30,7 +30,11 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
             companyCode: "asc"
         },
         include: {
-            companyShares: true
+            companyShares: {
+                orderBy: {
+                    id: "asc"
+                }
+            }
         }
     });
 
