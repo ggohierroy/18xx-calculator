@@ -37,11 +37,11 @@ const Home: NextPage = () => {
   };
 
   const [numberPlayers, setNumberPlayers] = React.useState(4);
-  const [playerNames, setPlayerNames] = React.useState<{ number: number, name: string | null }[]>([
-    {number: 1, name: null},
-    {number: 2, name: null},
-    {number: 3, name: null},
-    {number: 4, name: null}
+  const [playerNames, setPlayerNames] = React.useState<{ number: number, name: string }[]>([
+    {number: 1, name: ""},
+    {number: 2, name: ""},
+    {number: 3, name: ""},
+    {number: 4, name: ""}
   ]);
 
   const handleChangePlayers = (event: SelectChangeEvent) => {
@@ -51,10 +51,10 @@ const Home: NextPage = () => {
     setNumberPlayers(numberOfPlayers);
     
     setPlayerNames(playerNames => {
-      const newPlayerNames: { number: number, name: string | null }[] = [];
+      const newPlayerNames: { number: number, name: string }[] = [];
       for(let i = 0; i < numberOfPlayers; i++){
         if(typeof playerNames[i] === "undefined")
-          newPlayerNames.push({ number: i + 1, name: null });
+          newPlayerNames.push({ number: i + 1, name: "" });
         else
           newPlayerNames.push(playerNames[i]);
       }

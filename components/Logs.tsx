@@ -37,6 +37,9 @@ const Logs = ({ gameId, socket }: LogsProps): JSX.Element => {
             });
             scrollToBottom();
         })
+        socket.io.on('reconnect', () => {
+            fetchLogs();
+        });
     }, [socket]);
 
     const fetchLogs = async () => {

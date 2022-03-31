@@ -5,7 +5,7 @@ import CompanyConfig from '../../../company-configs/company-configs';
 // POST /api/game
 export default async function handle(req: NextApiRequest, res: NextApiResponse) {
 
-    const { gameCode, playerNames } = req.body as { gameCode: string, playerNames: { number: number, name: string | null }[] };
+    const { gameCode, playerNames } = req.body as { gameCode: string, playerNames: { number: number, name: string }[] };
 
     // create a new game
     const game = await prisma.game.create({
