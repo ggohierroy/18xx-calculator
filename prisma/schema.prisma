@@ -16,6 +16,8 @@ model Game {
   users User[]
   logs Log[]
   gameCode String
+  currentStepId Int?
+  currentStep Step? @relation(fields: [currentStepId], references: [id])
 }
 
 model Log {
@@ -58,4 +60,23 @@ model User {
   cumulativePayout Int @default(0)
   @@map(name: "users")
   cash Int?
+}
+
+model Step {
+  id Int @default(autoincrement()) @id
+  previousStepId Int?
+  previousStep Step? @relation("StepsTimeline", fields: [previousStepId], references: [id])
+  nextStep Step? @relation("StepsTimeline")
+  actions Action[]
+  game Game?
+}
+
+model Action {
+  id Int @default(autoincrement()) @id
+  stepId Int
+  step Step @relation(fields: [stepId], references: [id])
+  actionType String
+  entityType String
+  entityId Int
+  payload String?
 }

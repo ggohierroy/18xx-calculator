@@ -138,12 +138,31 @@ const GamePage: React.FC<GameWithCompaniesUsers> = (props) => {
             updateUsers(users);
         })
 
+        socket.on('user-updated', (user: User) => {
+            updateUser(user);
+        })
+
         socket.on('companies-updated', (companies: CompanyWithShares[]) => {
             setCompanies(companies);
         })
 
         setSocket(socket);
     };
+
+    const updateUser = async (newUser: User) => {
+        setUsers(users => {
+            return users.map(user => {
+                if(user.id == newUser.id)
+                    return newUser;
+                return user;
+            })
+        })
+        setSelectedUser(selectedUser => {
+            if(selectedUser.id == newUser.id)
+                return newUser;
+            return selectedUser;
+        });
+    }
 
     const updateUsers = async (users: User[]) => {
         setUsers(users);
@@ -334,6 +353,23 @@ const GamePage: React.FC<GameWithCompaniesUsers> = (props) => {
         }
     };
 
+    const handleUndo = async () => {
+        try {
+            // undo last action
+            const response = await fetch(`/api/game/undo/${props.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+            });
+
+            if(!response.ok){
+                console.error(response.statusText);
+                return;
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
     const [open, setOpen] = React.useState(false);
     const handleOpenModal = () => setOpen(true);
     const handleCloseModal = () => setOpen(false);
@@ -444,8 +480,7 @@ const GamePage: React.FC<GameWithCompaniesUsers> = (props) => {
                         flexWrap: 'wrap'
                     }}
                 >
-                    <Button>Undo</Button>
-                    <Button>Redo</Button>
+                    <Button onClick={handleUndo}>Undo Payout</Button>
                     <Button onClick={handleReset}>Reset Sum</Button>
                     <Button onClick={handleOpenModal}>Calculate Final Score</Button>
                     <ParTable gameCode={props.gameCode} />

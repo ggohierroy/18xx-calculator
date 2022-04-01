@@ -37,6 +37,13 @@ const Logs = ({ gameId, socket }: LogsProps): JSX.Element => {
             });
             scrollToBottom();
         })
+        socket.on('log-deleted', (logId: number) => {
+            setLogs(logs => {
+                return logs?.filter(log => {
+                    return log.id != logId;
+                })
+            })
+        })
         socket.io.on('reconnect', () => {
             fetchLogs();
         });
