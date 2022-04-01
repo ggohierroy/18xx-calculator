@@ -21,7 +21,7 @@ type CompanyWithCode = {
 const Company = ({ gameCode, company, selectedUser, onAdd, onAddCompany, onConfirmPayout }: CompanyWithCode): JSX.Element => {
 
     const gameConfig = CompanyConfig[gameCode];
-    const config = gameConfig[company.companyCode];
+    const config = gameConfig.companies[company.companyCode];
     const shares = company.companyShares.find((value, index) => { return value.userId == selectedUser.id });
     const subHeader = `${config.shortName} - Last received: ${company.lastReceived} (${company.cumulativeReceived})`
 

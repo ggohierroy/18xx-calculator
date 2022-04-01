@@ -18,7 +18,7 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
     const gameConfig = CompanyConfig[gameCode];
 
     let companiesData = [];
-    for(var companyCode in gameConfig) {
+    for(var companyCode in gameConfig.companies) {
         companiesData.push({ companyCode: companyCode, gameId: game.id });
     }
     const resultCompanies = await prisma.company.createMany({

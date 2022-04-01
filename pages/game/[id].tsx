@@ -11,6 +11,7 @@ import { DefaultEventsMap } from "socket.io/dist/typed-events";
 import Logs from "../../components/Logs";
 import CompanyConfig from "../../company-configs/company-configs";
 import Router from 'next/router';
+import ParTable from "../../components/ParTable";
 
 export const getServerSideProps: GetServerSideProps = async ({ params }) => {
     const game = await prisma.game.findUnique({
@@ -447,6 +448,7 @@ const GamePage: React.FC<GameWithCompaniesUsers> = (props) => {
                     <Button>Redo</Button>
                     <Button onClick={handleReset}>Reset Sum</Button>
                     <Button onClick={handleOpenModal}>Calculate Final Score</Button>
+                    <ParTable gameCode={props.gameCode} />
                     <Dialog open={open} onClose={handleCloseModal} maxWidth={'xs'} fullWidth={true} >
                         <DialogTitle>Calculate Final Score</DialogTitle>
                         <DialogContent>
@@ -457,7 +459,7 @@ const GamePage: React.FC<GameWithCompaniesUsers> = (props) => {
                             <TextField 
                                 key={company.id}
                                 id="outlined-basic" 
-                                label={`${CompanyConfig[props.gameCode][company.companyCode].shortName} Share Value`}
+                                label={`${CompanyConfig[props.gameCode].companies[company.companyCode].shortName} Share Value`}
                                 variant="outlined" 
                                 value={company.shareValue} 
                                 onChange={(e) => { handleShareValueChange(e, company.id) }}

@@ -33,7 +33,7 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
         throw new Error(`Couldn't find company`);
 
     // Create log
-    const companyConfig = CompanyConfig[game.gameCode][company.companyCode]
+    const companyConfig = CompanyConfig[game.gameCode].companies[company.companyCode]
     const payoutPerPlayer: String[] = [];
     const usersResult: User[] = [];
     for(let i = 0; i < company.companyShares.length; i++){
