@@ -15,31 +15,29 @@ const ParTable = ({ gameCode }: { gameCode: string }): JSX.Element | null => {
             <Dialog open={open} onClose={handleCloseModal} maxWidth={'xs'} fullWidth={true} >
                 <DialogTitle>Par Table</DialogTitle>
                 <DialogContent>
-                    <DialogContentText>
-                        <TableContainer component={Paper}>
-                            <Table aria-label="simple table">
-                                <TableHead>
-                                <TableRow>
-                                    <TableCell align="center">Par Value</TableCell>
-                                    <TableCell align="center">Total</TableCell>
+                    <TableContainer component={Paper}>
+                        <Table aria-label="simple table">
+                            <TableHead>
+                            <TableRow>
+                                <TableCell align="center">Par Value</TableCell>
+                                <TableCell align="center">Total</TableCell>
+                            </TableRow>
+                            </TableHead>
+                            <TableBody>
+                            {parTable.map((parValue) => (
+                                <TableRow
+                                    key={parValue}
+                                    sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                                >
+                                <TableCell align="center" component="th" scope="row">
+                                    {parValue}
+                                </TableCell>
+                                <TableCell align="center">{parValue*6}</TableCell>
                                 </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                {parTable.map((parValue) => (
-                                    <TableRow
-                                        key={parValue}
-                                        sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                                    >
-                                    <TableCell align="center" component="th" scope="row">
-                                        {parValue}
-                                    </TableCell>
-                                    <TableCell align="center">{parValue*6}</TableCell>
-                                    </TableRow>
-                                ))}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
-                    </DialogContentText>
+                            ))}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleCloseModal} variant="contained">Close</Button>
