@@ -18,7 +18,7 @@ type CompanyWithCode = {
 
 // Component is a function that returns a JSX Element
 // JSX Element can be inferred, but this makes it more obvious
-const Company = ({ gameCode, gameId, companyId, selectedUser }: CompanyWithCode): JSX.Element => {
+const CompanyJustId = ({ gameCode, gameId, companyId, selectedUser }: CompanyWithCode): JSX.Element => {
 
     const gameConfig = CompanyConfig[gameCode];
     const company = useSelector((state: RootState) => selectCompanyById(state, companyId))
@@ -201,4 +201,4 @@ const Company = ({ gameCode, gameId, companyId, selectedUser }: CompanyWithCode)
     );
 };
 
-export default Company;
+export default CompanyJustId;

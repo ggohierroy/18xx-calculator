@@ -9,7 +9,7 @@ import prisma from '../../../../lib/prisma';
 export default async function handle(req: NextApiRequest, res: NextApiResponse) {
     const gameId = req.query.id;
 
-    const game = await prisma.game.findUnique({
+    const game = await prisma!.game.findUnique({
         where: { id: Number(gameId) },
         include: { 
             currentStep: {
@@ -39,7 +39,7 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
         let typedActionType = ActionType[undoAction.actionType as keyof typeof ActionType];
         switch(typedActionType){
             case ActionType.createLog:
-                await prisma.log.delete({
+                await prisma!.log.delete({
                     where: { id: undoAction.entityId }
                 })
                 io.to(gameId.toString()).emit("log-deleted", undoAction.entityId);
@@ -48,13 +48,13 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
                 if(!undoAction.payload)
                     throw new Error("Payload can't be null");
                 const undoCompany = eval(undoAction.payload);
-                const company = await prisma.company.findUnique({
+                const company = await prisma!.company.findUnique({
                     where: { id: undoAction.entityId }
                 })
                 if(!company)
                     throw new Error("Company to undo no longer exists");
                 const updatedCompanyPayload = undoCompany(company) as Company;
-                const updatedCompany = await prisma.company.update({
+                const updatedCompany = await prisma!.company.update({
                     where: { id: company.id },
                     data: updatedCompanyPayload,
                     include: { 
@@ -71,13 +71,13 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
                 if(!undoAction.payload)
                     throw new Error("Payload can't be null");
                 const undoUser = eval(undoAction.payload);
-                const user = await prisma.user.findUnique({
+                const user = await prisma!.user.findUnique({
                     where: { id: undoAction.entityId }
                 })
                 if(!user)
                     throw new Error("User to undo no longer exists");
                 const updatedUserPayload = undoUser(user) as User;
-                const updatedUser = await prisma.user.update({
+                const updatedUser = await prisma!.user.update({
                     where: { id: user.id },
                     data: updatedUserPayload
                 })
@@ -86,16 +86,16 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
         }
     }
 
-    await prisma.game.update({
+    await prisma!.game.update({
         where: { id: Number(gameId) },
         data: { currentStepId: game.currentStep.previousStepId }
     })
 
-    await prisma.action.deleteMany({
+    await prisma!.action.deleteMany({
         where: { stepId: game.currentStep. id }
     })
 
-    await prisma.step.delete({
+    await prisma!.step.delete({
         where: { id: game.currentStep.id }
 
     })

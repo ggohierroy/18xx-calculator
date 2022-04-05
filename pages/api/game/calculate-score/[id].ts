@@ -15,12 +15,12 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
     const gameId = req.query.id;
     const { users, companies } = req.body as { users: User[], companies: CompanyWithShares[] };
     
-    const companiesResult = await prisma.company.findMany({
+    const companiesResult = await prisma!.company.findMany({
         where: { gameId: Number(gameId) },
         include: { companyShares: true }
     });
 
-    const usersResult = await prisma.user.findMany({
+    const usersResult = await prisma!.user.findMany({
         where: { gameId: Number(gameId) }
     });
 
@@ -34,8 +34,7 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
 
         const cash = inputUser.cash || 0;
 
-        console.log("update user");
-        await prisma.user.update({
+        await prisma!.user.update({
             where: { id: user.id },
             data: { cash: cash }
         })
@@ -63,7 +62,7 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
 
     for(let index in companiesShareValue){
         let company = companiesShareValue[index];
-        await prisma.company.update({
+        await prisma!.company.update({
             where: { id: company.companyId },
             data: { shareValue: company.shareValue }
         })
@@ -72,7 +71,7 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
     const scorePerPlayerText = scorePerPlayer.join(", ");
     const logText = `Final Score: ${scorePerPlayerText}`;
 
-    const logResult = await prisma.log.create({
+    const logResult = await prisma!.log.create({
         data: {
             gameId: Number(gameId),
             value: logText

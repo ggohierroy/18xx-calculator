@@ -10,7 +10,7 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
     const companyId = req.query.id;
     const { payout, gameId } = req.body as { payout: number, gameId: number };
 
-    const game = await prisma.game.findUnique({
+    const game = await prisma!.game.findUnique({
         where: { id: gameId},
         include: {
             currentStep: true
@@ -24,23 +24,23 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
     let step: Step;
     const currentStep = game.currentStep;
     if(!currentStep){
-        step = await prisma.step.create({
+        step = await prisma!.step.create({
             data: { }
         })
     } else {
-        step = await prisma.step.create({
+        step = await prisma!.step.create({
             data: { previousStepId: currentStep.id }
         })
     }
 
     // update current step
-    await prisma.game.update({
+    await prisma!.game.update({
         where: { id: game.id },
         data: { currentStepId: step.id }
     })
 
     // get the company, shares, and users
-    const company = await prisma.company.findUnique({
+    const company = await prisma!.company.findUnique({
         where: { id: Number(companyId) },
         include: {
             companyShares: {
@@ -79,7 +79,7 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
         undoCommands.push({ entityType: "user", entityId: share.user.id, actionType: "updateUser", payload: undoUser, stepId: step.id });
 
         // update user
-        const userResult = await prisma.user.update({
+        const userResult = await prisma!.user.update({
             where: { id: share.userId },
             data: {
                 lastPayout: playerPayout,
@@ -106,7 +106,7 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
     undoCommands.push({ entityType: "company", entityId: company.id, actionType: "updateCompany", payload: undoCompany, stepId: step.id });
 
     // update company
-    const companyResult = await prisma.company.update({
+    const companyResult = await prisma!.company.update({
         where: { id: Number(companyId) },
         include: {
             companyShares: {
@@ -125,7 +125,7 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
     const playerPayoutText = payoutPerPlayer.join(", ");
     const logText = `${companyConfig.shortName} pays out ${payout} per share: ${playerPayoutText}`;
 
-    const logResult = await prisma.log.create({
+    const logResult = await prisma!.log.create({
         data: {
             gameId: gameId,
             value: logText
@@ -136,7 +136,7 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
     undoCommands.push({ entityType: "log", entityId: logResult.id, actionType: "createLog", stepId: step.id, payload: null });
 
     // persist undo commands
-    await prisma.action.createMany({
+    await prisma!.action.createMany({
         data: undoCommands
     })
 

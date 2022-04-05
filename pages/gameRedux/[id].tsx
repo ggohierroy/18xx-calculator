@@ -16,7 +16,7 @@ import { selectedUserIdSet, selectSelectedUserId } from '../../redux/selectedUse
 import { useDispatch, useSelector } from 'react-redux';
 import { companiesSumReset, companyUpdated, denormalizedCompaniesReceived, selectAllCompanies, selectCompanyIds } from '../../redux/companiesSlice';
 import { companyShareUpdated } from '../../redux/companySharesSlice';
-import CompanyJustId from '../../components/CompanyJustId';
+import Company from '../../components/Company';
 
 export const getServerSideProps = wrapper.getServerSideProps(store => async ({params}) => {
     
@@ -64,7 +64,7 @@ type CompanyWithShares = Prisma.CompanyGetPayload<{
     }
 }>
 
-const GamePage : NextPage = (props) => {
+const GamePageRedux : NextPage = (props) => {
 
     const gameId = useSelector(selectGameId);
     const selectedUserId = useSelector(selectSelectedUserId);
@@ -339,7 +339,7 @@ const GamePage : NextPage = (props) => {
                     }}
                 >
                     {companyIds.map((companyId) => (
-                        <CompanyJustId key={companyId} gameCode={gameCode} gameId={gameId} companyId={companyId} selectedUser={selectedUser} />
+                        <Company key={companyId} gameCode={gameCode} gameId={gameId} companyId={companyId} selectedUser={selectedUser} />
                     ))}
                 </Box>
             </Container>
@@ -347,4 +347,4 @@ const GamePage : NextPage = (props) => {
     )
 }
 
-export default GamePage
+export default GamePageRedux

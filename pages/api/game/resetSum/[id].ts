@@ -8,11 +8,11 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
     const gameId = req.query.id;
     
     // update users
-    await prisma.user.updateMany({
+    await prisma!.user.updateMany({
         where: { gameId: Number(gameId) },
         data: { cumulativePayout: 0 }
     });
-    const userResult = await prisma.user.findMany({
+    const userResult = await prisma!.user.findMany({
         where: { gameId: Number(gameId) },
         orderBy: {
             name: "asc"
@@ -20,11 +20,11 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
     });
 
     // update companies
-    await prisma.company.updateMany({
+    await prisma!.company.updateMany({
         where: { gameId: Number(gameId) },
         data: { cumulativeReceived: 0 }
     });
-    const companyResult = await prisma.company.findMany({
+    const companyResult = await prisma!.company.findMany({
         where: { gameId: Number(gameId) },
         orderBy: {
             companyCode: "asc"
@@ -41,8 +41,7 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
     const result = { usersResult: userResult, companiesResult: companyResult };
 
     let io = (res as any).socket.server.io as Server<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>;
-    io.to(gameId).emit("users-updated", userResult);
-    io.to(gameId).emit("companies-updated", companyResult);
+    io.to(gameId).emit("sum-reset");
 
     res.json(result);
 }
