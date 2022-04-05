@@ -8,7 +8,7 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
     const { gameCode, playerNames } = req.body as { gameCode: string, playerNames: { number: number, name: string }[] };
 
     // create a new game
-    const game = await prisma.game.create({
+    const game = await prisma!.game.create({
         data: {
             gameCode: gameCode
         } 
@@ -21,7 +21,7 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
     for(var companyCode in gameConfig.companies) {
         companiesData.push({ companyCode: companyCode, gameId: game.id });
     }
-    const resultCompanies = await prisma.company.createMany({
+    const resultCompanies = await prisma!.company.createMany({
         data: companiesData
     })
 
@@ -30,19 +30,19 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
         return { gameId: game.id, name: playerName.name || `Player ${playerName.number}`}
     });
 
-    const resultUsers = await prisma.user.createMany({
+    const resultUsers = await prisma!.user.createMany({
         data: usersData
     })
 
     // get newly created users
-    const users = await prisma.user.findMany({
+    const users = await prisma!.user.findMany({
         where: {
             gameId: game.id
         }
     })
 
     // get newly created companies
-    const companies = await prisma.company.findMany({
+    const companies = await prisma!.company.findMany({
         where: {
             gameId: game.id
         }
@@ -58,7 +58,7 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
         }
     }
 
-    const resultCompanyShares = await prisma.companyShare.createMany({
+    const resultCompanyShares = await prisma!.companyShare.createMany({
         data: companySharesData
     })
 

@@ -6,7 +6,7 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
 
     const { gameId } = req.query;
 
-    const logs = await prisma.log.findMany({
+    const logs = await prisma!.log.findMany({
         where: { gameId: Number(gameId) },
         orderBy: {
             createdTime: "asc"
