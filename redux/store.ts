@@ -1,23 +1,23 @@
 import { Action, configureStore, ThunkAction } from '@reduxjs/toolkit'
 import { createWrapper } from 'next-redux-wrapper';
-import counterReducer from './counterSlice'
 import gameReducer from './gameSlice'
 import usersReducer from './usersSlice'
 import selectedUserReducer from './selectedUserSlice'
 import companiesReducer from './companiesSlice'
 import companySharesReducer from './companySharesSlice'
+import logsReducer from './logsSlice'
 
 // wrap the configuration of the store inside a makeStore function
 // this will be used to create a new store client or server-side with redux-wrapper
 const makeStore = () =>
     configureStore({
         reducer: {
-            counter: counterReducer,
             game: gameReducer,
             users: usersReducer,
             selectedUser: selectedUserReducer,
             companies: companiesReducer,
-            companyShares: companySharesReducer
+            companyShares: companySharesReducer,
+            logs: logsReducer
         }
     })
 

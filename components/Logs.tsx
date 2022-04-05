@@ -1,76 +1,25 @@
 import { Box, Typography } from "@mui/material";
-import { Log } from "@prisma/client";
 import React from "react";
-import { Socket } from "socket.io-client";
-import { DefaultEventsMap } from "socket.io/dist/typed-events";
+import { useSelector } from "react-redux";
+import { selectAllLogs } from "../redux/logsSlice";
+import { RootState } from "../redux/store";
 
-type LogsProps = {
-    gameId: Number
-    socket: Socket<DefaultEventsMap, DefaultEventsMap> | undefined
-}
+const Logs = (): JSX.Element => {
 
-const Logs = ({ gameId, socket }: LogsProps): JSX.Element => {
-    const [logs, setLogs] = React.useState<Log[]>();
+    const logs = useSelector((state: RootState) => selectAllLogs(state));
     const dateTimeFormat = new Intl.DateTimeFormat("fr-FR", {
         hour: 'numeric', 
         minute: 'numeric',
         hour12: false
     })
     const messagesEndRef = React.useRef<null | HTMLDivElement>(null);
+
+    React.useEffect(() => { 
+        scrollToBottom();
+    });
+
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: 'nearest', inline: 'start' })
-    }
-    React.useEffect(() => { 
-        if(!socket)
-            return;
-        fetchLogs();
-        socket.on('log-created', (log: Log) => {
-            setLogs(logs => {
-                if(typeof logs == "undefined")
-                    return;
-
-                let newLogs = logs.map(log => {
-                    return log;
-                })
-                newLogs.push(log);
-                return newLogs;
-            });
-            scrollToBottom();
-        })
-        socket.on('log-deleted', (logId: number) => {
-            setLogs(logs => {
-                return logs?.filter(log => {
-                    return log.id != logId;
-                })
-            })
-        })
-        socket.io.on('reconnect', () => {
-            fetchLogs();
-        });
-    }, [socket]);
-
-    const fetchLogs = async () => {
-        if(typeof window == "undefined")
-            return;
-
-        try {
-            const response = await fetch(`/api/log?gameId=${gameId}`, {
-                method: 'GET',
-                headers: { 'Content-Type': 'application/json' },
-            });
-
-            if(!response.ok){
-                console.error(response.statusText);
-                return;
-            }
-
-            const logsResult = await (response.json() as Promise<Log[]>);
-
-            setLogs(logsResult);
-            scrollToBottom();
-        } catch (error) {
-            console.error(error);
-        }
     }
 
     return (
@@ -81,12 +30,9 @@ const Logs = ({ gameId, socket }: LogsProps): JSX.Element => {
             p: 1,
             overflow: "auto"
         }}>
-            {typeof logs != "undefined" 
-                ? logs.map((log) => (
-                    <Typography key={log.id}>[{dateTimeFormat.format(new Date(log.createdTime))}] {log.value}</Typography>
-                    ))
-                : <Typography>Loading...</Typography>
-            }
+            {logs.map((log) => 
+            <Typography key={log.id}>[{dateTimeFormat.format(new Date(log.createdTime))}] {log.value}</Typography>
+            )}
             <div ref={messagesEndRef} />
         </Box>
     );

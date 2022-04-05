@@ -1,11 +1,10 @@
 import { AppBar, Box, Button, Container, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, IconButton, Menu, MenuItem, TextField, Toolbar, Typography } from '@mui/material';
-import { CompanyShare, Prisma, User } from '@prisma/client';
+import { CompanyShare, Log, Prisma, User } from '@prisma/client';
 import type { NextPage } from 'next';
 import React from 'react';
 import { selectGameCode, selectGameId, setGame } from '../../redux/gameSlice';
 import { RootState, wrapper } from '../../redux/store';
-import { io, Socket } from "socket.io-client";
-import { DefaultEventsMap } from "socket.io/dist/typed-events";
+import { io } from "socket.io-client";
 import Router from 'next/router';
 import CompanyConfig from '../../company-configs/company-configs';
 import Logs from '../../components/Logs';
@@ -17,6 +16,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { companiesSumReset, companyUpdated, denormalizedCompaniesReceived, selectAllCompanies, selectCompanyIds } from '../../redux/companiesSlice';
 import { companyShareUpdated } from '../../redux/companySharesSlice';
 import Company from '../../components/Company';
+import { logAdded, logRemoved, logsReceived } from '../../redux/logsSlice';
 
 export const getServerSideProps = wrapper.getServerSideProps(store => async ({params}) => {
     
@@ -39,7 +39,8 @@ export const getServerSideProps = wrapper.getServerSideProps(store => async ({pa
                     }
                 }
             },
-            users: true
+            users: true,
+            logs: true
         }
     });
 
@@ -48,6 +49,7 @@ export const getServerSideProps = wrapper.getServerSideProps(store => async ({pa
 
     await store.dispatch(setGame(game));
     await store.dispatch(usersReceived(game.users));
+    await store.dispatch(logsReceived(game.logs));
     await store.dispatch(selectedUserIdSet(game.users[0].id));
     await store.dispatch(denormalizedCompaniesReceived(game.companies));
 
@@ -78,7 +80,6 @@ const GamePage : NextPage = (props) => {
         throw new Error("User does not exist");
 
     const dispatch = useDispatch();
-    const [socket, setSocket] = React.useState<Socket<DefaultEventsMap, DefaultEventsMap>>();
     
     React.useEffect(() => { 
         socketInitializer();
@@ -126,7 +127,12 @@ const GamePage : NextPage = (props) => {
             dispatch(companiesSumReset());
         })
 
-        setSocket(socket);
+        socket.on('log-created', (log: Log) => {
+            dispatch(logAdded(log));
+        })
+        socket.on('log-deleted', (logId: number) => {
+            dispatch(logRemoved(logId));
+        })
     };
 
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -268,7 +274,7 @@ const GamePage : NextPage = (props) => {
                 </Toolbar>
             </AppBar>
             <Container>
-                <Logs gameId={gameId} socket={socket} />
+                <Logs />
                 <Box
                     sx={{
                         mt: 1,
